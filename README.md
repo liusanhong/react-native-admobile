@@ -2,7 +2,12 @@
 
 ## Getting started
 
-`$ npm install react-native-admobile --save`
+```
+
+$ npm install react-native-admobile --save
+或
+$ yarn add react-native-admobile
+```
 
 ### Mostly automatic installation
 
