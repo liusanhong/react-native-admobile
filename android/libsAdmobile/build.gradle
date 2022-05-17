@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default",file("oaid_sdk_1.0.25.aar"))
