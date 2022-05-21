@@ -75,7 +75,5 @@ Android:
 import ReactNativeAdmobile from 'react-native-admobile';
 
 // TODO: What to do with the module?
-
-
 ReactNativeAdmobile;
 ```
