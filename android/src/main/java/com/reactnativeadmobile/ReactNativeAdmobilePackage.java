@@ -1,6 +1,6 @@
 // ReactNativeAdmobilePackage.java
 
-package com.reactlibrary;
+package com.reactnativeadmobile;
 
 import java.util.Arrays;
 import java.util.Collections;

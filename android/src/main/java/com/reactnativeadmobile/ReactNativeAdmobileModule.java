@@ -1,6 +1,6 @@
 // ReactNativeAdmobileModule.java
 
-package com.reactlibrary;
+package com.reactnativeadmobile;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
