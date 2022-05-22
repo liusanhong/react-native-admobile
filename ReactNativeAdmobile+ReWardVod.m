@@ -1,0 +1,211 @@
+//
+//  ReactNativeAdmobile+ReWardVod.m
+//  react-native-admobile
+//
+//  Created by zhoukai on 2022/5/22.
+//
+
+#import "ReactNativeAdmobile+ReWardVod.h"
+#import <objc/runtime.h>
+
+
+@interface ReactNativeAdmobile (ReWardVod)
+
+@property (nonatomic, strong)ADSuyiSDKRewardvodAd *rewardvodAd;
+@property(nonatomic ,assign) BOOL isReadyToplay;
+
+
+@end
+
+@implementation ReactNativeAdmobile (ReWardVod)
+
+- (UIViewController*) getRootVC {
+    UIViewController *root = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+    while (root.presentedViewController != nil) {
+        root = root.presentedViewController;
+    }
+    
+    return root;
+}
+
+- (void)loadRewardvodAd:(NSString *)posId {
+    // 1、初始化激励视频广告
+    self.rewardvodAd  = [[ADSuyiSDKRewardvodAd alloc]init];
+    self.rewardvodAd.delegate = self;
+    self.rewardvodAd.tolerateTimeout = 5;
+    self.rewardvodAd. controller = [self getRootVC];
+    self.rewardvodAd.posId = posId;
+    self.rewardvodAd.userId = @"erik";
+    self.rewardvodAd.extraInfo = @"这是一个激励验证";
+    self.rewardvodAd.rewardName = @"刷豆";
+    self.rewardvodAd.rewardAmount = [NSNumber numberWithInt:2];
+    // 2、加载激励视频广告
+    [self.rewardvodAd loadRewardvodAd];
+}
+
+- (void)showRewardvodAd {
+    if ([self.rewardvodAd rewardvodAdIsReady] && self.isReadyToplay) {
+        [self.rewardvodAd showRewardvodAd];
+    }
+}
+
+
+#pragma mark - ADSuyiSDKRewardvodAdDelegate
+/**
+ 广告数据加载成功回调
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdLoadSuccess:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    
+}
+
+/**
+ 激励视频广告准备好被播放
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdReadyToPlay:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    self.isReadyToplay = YES;
+    dispatch_async(dispatch_get_main_queue(), ^{
+//        [self.view makeToast:@"激励视频准备完成"];
+        [self.rewardvodAd showRewardvodAd];
+    });
+    
+}
+
+/**
+ 视频数据下载成功回调，已经下载过的视频会直接回调
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdVideoLoadSuccess:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    [self.rewardvodAd showRewardvodAd];
+}
+/**
+ 视频播放页即将展示回调
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdWillVisible:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    
+}
+/**
+ 视频广告曝光回调
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdDidVisible:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    
+}
+/**
+ 视频播放页关闭回调
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    // 4、广告内存回收
+    rewardvodAd = nil;
+}
+/**
+ 视频广告信息点击回调
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdDidClick:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    
+}
+/**
+ 视频广告视频播放完成
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdDidPlayFinish:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    
+}
+
+/**
+ 视频广告视频达到奖励条件
+ 
+ @param rewardvodAd 广告实例
+ */
+- (void)adsy_rewardvodAdDidRewardEffective:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    NSLog(@"=======>%@", rewardvodAd);
+    // RN成功回调
+    self.resolve(@{@"posId":rewardvodAd.posId});
+}
+
+/**
+ 视频广告请求失败回调
+ 
+ @param rewardvodAd 广告实例
+ @param errorModel 具体错误信息
+ */
+- (void)adsy_rewardvodAdFailToLoad:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
+    // 4、广告内存回收
+    dispatch_async(dispatch_get_main_queue(), ^{
+//        [self.view makeToast:errorModel.description];
+    });
+    rewardvodAd = nil;
+}
+
+/**
+ 视频广告播放时各种错误回调
+ 
+ @param rewardvodAd 广告实例
+ @param errorModel 具体错误信息
+ */
+- (void)adsy_rewardvodAdPlaying:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
+    
+}
+
+- (void)adsy_rewardvodAdServerDidSucceed:(ADSuyiSDKRewardvodAd *)rewardvodAd {
+    
+}
+
+- (void)adsy_rewardvodAdServerDidFailed:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
+    
+}
+
+
+static char *rewardvodAdKey = "rewardvodAd";
+
+- (ADSuyiSDKRewardvodAd *)rewardvodAd {
+  return objc_getAssociatedObject(self, &rewardvodAdKey);
+
+}
+
+- (void)setRewardvodAd:(ADSuyiSDKRewardvodAd *)rewardvodAd {
+  objc_setAssociatedObject(self, &rewardvodAdKey, rewardvodAd, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+}
+
+
+
+static char *isReadyToplayKey = &isReadyToplayKey;
+
+- (void)setIsReadyToplay:(BOOL )isReadyToplay {
+  objc_setAssociatedObject(self, &isReadyToplayKey, @(isReadyToplay), OBJC_ASSOCIATION_ASSIGN);
+
+}
+
+- (BOOL)isReadyToplayKey{
+    return [objc_getAssociatedObject(self, isReadyToplayKey) boolValue];
+}
+
+
+static char *posId = "posIdKey";
+
+- (NSString *)posId {
+  return objc_getAssociatedObject(self, &posId);
+
+}
+
+- (void)setPosId:(NSString *)posId{
+  objc_setAssociatedObject(self, &posId, posId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+}
+
+
+
+@end

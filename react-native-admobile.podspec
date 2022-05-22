@@ -25,6 +25,10 @@ Pod::Spec.new do |s|
 
   s.dependency "React"
   # ...
-  # s.dependency "..."
+  s.dependency "ADSuyiSDK",'~> 3.6.0.0'
+  s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/tianmu"
+  s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/admobile"
+  s.dependency "EcookSDK"
+
 end
 
