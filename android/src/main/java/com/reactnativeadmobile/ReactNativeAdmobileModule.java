@@ -9,16 +9,15 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
 
 import cn.admobiletop.adsuyi.ADSuyiSdk;
-import cn.admobiletop.adsuyi.ad.ADSuyiSplashAd;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
 
 public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
 
     private final ReactApplicationContext reactContext;
+    private String TAG = "AdmobileModule";
 
     public ReactNativeAdmobileModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -37,7 +36,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
 //    }
 
     @ReactMethod
-    public void initAd(String appID) {
+    public void initAd(String appID,Promise promise) {
         if(this.reactContext!= null){
             ReactApplicationContext context = this.reactContext;
             this.reactContext.runOnUiQueueThread(new Runnable() {
@@ -70,12 +69,13 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
                         @Override
                         public void onSuccess() {
                             Log.e("initAd:","onSuccess");
+                            promise.resolve("success");
                         }
 
                         @Override
                         public void onFailed(String s) {
                             Log.e("initAd: onFailed:",s);
-
+                            promise.reject("failed",s);
                         }
                     });
                 }
@@ -84,6 +84,9 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
     }
 
 
+    /**
+     * 开屏广告
+     */
     @ReactMethod
     public void splashAd() {
         if(this.reactContext!= null){
@@ -92,6 +95,19 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
             this.reactContext.startActivity(intent);
         }
     }
+
+    /**
+     * 激励广告
+     */
+    @ReactMethod
+    public void rewardVodAd() {
+        if(this.reactContext!= null){
+            Intent intent = new Intent(this.reactContext,RewardVodActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+            this.reactContext.startActivity(intent);
+        }
+    }
+
 
 
 }

@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.reactnativeadmobile">
+
     <application>
+        <activity
+            android:name=".RewardVodActivity"
+            android:exported="true" />
         <activity
             android:name=".SplashAdActivity"
             android:exported="true" />
     </application>
+
 </manifest>
