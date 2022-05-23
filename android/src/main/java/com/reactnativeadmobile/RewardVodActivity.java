@@ -54,6 +54,7 @@ public class RewardVodActivity extends AppCompatActivity {
                 Log.d(TAG, "广告获取成功回调... ");
                 RewardVodActivity.this.rewardVodAdInfo = rewardVodAdInfo;
                 Log.d(TAG, "onAdReceive----->");
+                ADSuyiAdUtil.showRewardVodAdConvenient(RewardVodActivity.this, rewardVodAdInfo);
             }
 
             @Override
@@ -97,6 +98,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.d(TAG, "onAdClose----->");
                 Log.d(TAG, "广告关闭回调");
+                RewardVodActivity.this.finish();
             }
 
             @Override
@@ -113,6 +115,6 @@ public class RewardVodActivity extends AppCompatActivity {
 // 加载激励视频广告，参数为广告位ID
         rewardVodAd.loadAd("e6d23c341789ad76f4");
 
-        ADSuyiAdUtil.showRewardVodAdConvenient(this, rewardVodAdInfo);
+
     }
 }
