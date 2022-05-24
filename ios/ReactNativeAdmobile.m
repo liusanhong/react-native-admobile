@@ -21,7 +21,7 @@ RCT_EXPORT_METHOD(sampleMethod:(NSString *)stringArgument numberParameter:(nonnu
 }
 
 
-RCT_EXPORT_METHOD(initRewardVodAd:(NSString*)vodId
+RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
                  resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
