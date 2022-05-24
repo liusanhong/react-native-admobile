@@ -20,13 +20,14 @@ public class SplashAdActivity extends AppCompatActivity {
     ADSuyiSplashAd adSuyiSplashAd;
     String TAG = "SplashAdActivity";
     Activity mContext ;
+    String mAdId ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_ad);
         mContext= this;
-
+        mAdId = getIntent().getStringExtra("adId");
 
         LinearLayoutCompat contentView = findViewById(R.id.splash_container);
         // 创建开屏广告实例，第一个参数可以是Activity或Fragment，第二个参数是广告容器
@@ -61,30 +62,31 @@ public class SplashAdActivity extends AppCompatActivity {
             @Override
             public void onADTick(long countdownSeconds) {
                 // 如果没有设置自定义跳过按钮不会回调该方法（单位为秒）
-                Log.d(TAG, "倒计时剩余时长（单位秒）" + countdownSeconds);
+                Log.e(TAG, "倒计时剩余时长（单位秒）" + countdownSeconds);
             }
             @Override
             public void onAdSkip(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告跳过回调，不一定准确，埋点数据仅供参考... ");
+                Log.e(TAG, "广告跳过回调，不一定准确，埋点数据仅供参考... ");
             }
             @Override
             public void onAdReceive(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告获取成功回调... ");
+                Log.e(TAG, "广告获取成功回调... ");
             }
 
             @Override
             public void onAdExpose(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                Log.e(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
             }
 
             @Override
             public void onAdClick(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                Log.e(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                AdCallbackUtils.doSplashSuccessCallback();
             }
 
             @Override
             public void onAdClose(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告关闭回调，需要在此进行页面跳转");
+                Log.e(TAG, "广告关闭回调，需要在此进行页面跳转");
 //                jumpMain();
                 mContext.finish();
             }
@@ -93,14 +95,16 @@ public class SplashAdActivity extends AppCompatActivity {
             public void onAdFailed(ADSuyiError adSuyiError) {
                 if (adSuyiError != null) {
                     String failedJson = adSuyiError.toString();
-                    Log.d(TAG, "onAdFailed----->" + failedJson);
+                    Log.e(TAG, "onAdFailed----->" + failedJson);
+                    AdCallbackUtils.doSplashErrorCallback();
+
                 }
 //                jumpMain();
                 mContext.finish();
             }
         });
 
-// 加载开屏广告 TODO
-        adSuyiSplashAd.loadAd("377b03ea4dff47bda1");
+//        adSuyiSplashAd.loadAd("377b03ea4dff47bda1");
+        adSuyiSplashAd.loadAd(mAdId);
     }
 }
