@@ -10,10 +10,10 @@ export function initAd(appid) {
   return ReactNativeAdmobile.initAd(appid);
 }
 
-export function splashAd() {
-  ReactNativeAdmobile.splashAd();
+export function splashAd(adId,onSuccess,onError) {
+  ReactNativeAdmobile.splashAd(adId,onSuccess,onError);
 }
 
-export function rewardVodAd() {
-  ReactNativeAdmobile.rewardVodAd();
+export function rewardVodAd(adId,onSuccess,onError) {
+  ReactNativeAdmobile.rewardVodAd(adId,onSuccess,onError);
 }

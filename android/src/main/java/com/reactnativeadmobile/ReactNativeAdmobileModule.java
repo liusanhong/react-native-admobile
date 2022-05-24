@@ -5,6 +5,7 @@ package com.reactnativeadmobile;
 import android.content.Intent;
 import android.util.Log;
 
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -88,10 +89,11 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
      * 开屏广告
      */
     @ReactMethod
-    public void splashAd() {
+    public void splashAd(String adId, Callback successCallback,Callback errorCallback) {
         if(this.reactContext!= null){
             Intent intent = new Intent(this.reactContext,SplashAdActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+            intent.putExtra("adId",adId);
             this.reactContext.startActivity(intent);
         }
     }
@@ -100,10 +102,11 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
      * 激励广告
      */
     @ReactMethod
-    public void rewardVodAd() {
+    public void rewardVodAd(String adId, Callback successCallback,Callback errorCallback) {
         if(this.reactContext!= null){
             Intent intent = new Intent(this.reactContext,RewardVodActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+            intent.putExtra("adId",adId);
             this.reactContext.startActivity(intent);
         }
     }

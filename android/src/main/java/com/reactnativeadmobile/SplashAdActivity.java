@@ -20,13 +20,14 @@ public class SplashAdActivity extends AppCompatActivity {
     ADSuyiSplashAd adSuyiSplashAd;
     String TAG = "SplashAdActivity";
     Activity mContext ;
+    String mAdId ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_ad);
         mContext= this;
-
+        mAdId = getIntent().getStringExtra("adId");
 
         LinearLayoutCompat contentView = findViewById(R.id.splash_container);
         // 创建开屏广告实例，第一个参数可以是Activity或Fragment，第二个参数是广告容器
@@ -101,6 +102,7 @@ public class SplashAdActivity extends AppCompatActivity {
         });
 
 // 加载开屏广告 TODO
-        adSuyiSplashAd.loadAd("377b03ea4dff47bda1");
+//        adSuyiSplashAd.loadAd("377b03ea4dff47bda1");
+        adSuyiSplashAd.loadAd(mAdId);
     }
 }

@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.react.bridge.Callback;
+
 import cn.admobiletop.adsuyi.ad.ADSuyiRewardVodAd;
 import cn.admobiletop.adsuyi.ad.data.ADSuyiRewardVodAdInfo;
 import cn.admobiletop.adsuyi.ad.entity.ADSuyiExtraParams;
@@ -17,12 +19,13 @@ public class RewardVodActivity extends AppCompatActivity {
     private String TAG = "RewardVodActivity";
     ADSuyiRewardVodAd rewardVodAd;
     private ADSuyiRewardVodAdInfo rewardVodAdInfo;
+    String mAdId ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reward_vod);
-
+        mAdId = getIntent().getStringExtra("adId");
 
         // 创建激励视频广告实例
         rewardVodAd = new ADSuyiRewardVodAd(this);
@@ -51,53 +54,53 @@ public class RewardVodActivity extends AppCompatActivity {
             @Override
             public void onAdReceive(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                 // 激励视频广告对象一次成功拉取的广告数据只允许展示一次
-                Log.d(TAG, "广告获取成功回调... ");
+                Log.e(TAG, "广告获取成功回调... ");
                 RewardVodActivity.this.rewardVodAdInfo = rewardVodAdInfo;
-                Log.d(TAG, "onAdReceive----->");
+                Log.e(TAG, "onAdReceive----->");
                 ADSuyiAdUtil.showRewardVodAdConvenient(RewardVodActivity.this, rewardVodAdInfo);
             }
 
             @Override
             public void onVideoCache(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 // 部分渠道存在激励展示类广告，不会回调该方法，建议在onAdReceive做广告展示处理
-                Log.d(TAG, "onVideoCache----->");
-                Log.d(TAG, "广告视频缓存成功回调... ");
+                Log.e(TAG, "onVideoCache----->");
+                Log.e(TAG, "广告视频缓存成功回调... ");
             }
 
             @Override
             public void onVideoComplete(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
-                Log.d(TAG, "onVideoComplete----->");
-                Log.d(TAG, "广告观看完成回调... ");
+                Log.e(TAG, "onVideoComplete----->");
+                Log.e(TAG, "广告观看完成回调... ");
             }
 
             @Override
             public void onVideoError(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo, ADSuyiError adSuyiError) {
-                Log.d(TAG, "onVideoError----->");
-                Log.d(TAG, "广告播放错误回调... ");
+                Log.e(TAG, "onVideoError----->");
+                Log.e(TAG, "广告播放错误回调... ");
             }
 
             @Override
             public void onReward(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
-                Log.d(TAG, "onReward----->");
-                Log.d(TAG, "广告激励发放回调... ");
+                Log.e(TAG, "onReward----->");
+                Log.e(TAG, "广告激励发放回调... ");
             }
 
             @Override
             public void onAdExpose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
-                Log.d(TAG, "onAdExpose----->");
-                Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                Log.e(TAG, "onAdExpose----->");
+                Log.e(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
             }
 
             @Override
             public void onAdClick(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
-                Log.d(TAG, "onAdClick----->");
-                Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                Log.e(TAG, "onAdClick----->");
+                Log.e(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
             }
 
             @Override
             public void onAdClose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
-                Log.d(TAG, "onAdClose----->");
-                Log.d(TAG, "广告关闭回调");
+                Log.e(TAG, "onAdClose----->");
+                Log.e(TAG, "广告关闭回调");
                 RewardVodActivity.this.finish();
             }
 
@@ -105,7 +108,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdFailed(ADSuyiError adSuyiError) {
                 if (adSuyiError != null) {
                     String failedJosn = adSuyiError.toString();
-                    Log.d(TAG, "onAdFailed----->" + failedJosn);
+                    Log.e(TAG, "onAdFailed----->" + failedJosn);
                 }
             }
         });
@@ -113,7 +116,8 @@ public class RewardVodActivity extends AppCompatActivity {
 // 激励广告场景id（场景id非必选字段，如果需要可到开发者后台创建）
 //        rewardVodAd.setSceneId("e6d23c341789ad76f4");
 // 加载激励视频广告，参数为广告位ID
-        rewardVodAd.loadAd("e6d23c341789ad76f4");
+//        rewardVodAd.loadAd("e6d23c341789ad76f4");
+        rewardVodAd.loadAd(mAdId);
 
 
     }
