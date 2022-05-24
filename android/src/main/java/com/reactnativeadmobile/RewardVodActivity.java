@@ -21,6 +21,7 @@ public class RewardVodActivity extends AppCompatActivity {
     private ADSuyiRewardVodAdInfo rewardVodAdInfo;
     String mAdId ;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,12 +78,15 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onVideoError(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo, ADSuyiError adSuyiError) {
                 Log.e(TAG, "onVideoError----->");
                 Log.e(TAG, "广告播放错误回调... ");
+                AdCallbackUtils.doRewordErrorCallback();
+
             }
 
             @Override
             public void onReward(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onReward----->");
                 Log.e(TAG, "广告激励发放回调... ");
+                AdCallbackUtils.doRewordSuccessCallback();
             }
 
             @Override
@@ -109,6 +113,7 @@ public class RewardVodActivity extends AppCompatActivity {
                 if (adSuyiError != null) {
                     String failedJosn = adSuyiError.toString();
                     Log.e(TAG, "onAdFailed----->" + failedJosn);
+                    AdCallbackUtils.doRewordErrorCallback();
                 }
             }
         });
@@ -118,7 +123,5 @@ public class RewardVodActivity extends AppCompatActivity {
 // 加载激励视频广告，参数为广告位ID
 //        rewardVodAd.loadAd("e6d23c341789ad76f4");
         rewardVodAd.loadAd(mAdId);
-
-
     }
 }

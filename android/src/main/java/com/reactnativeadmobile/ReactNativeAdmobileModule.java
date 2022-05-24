@@ -15,10 +15,14 @@ import cn.admobiletop.adsuyi.ADSuyiSdk;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
 
-public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
+public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implements AdCallback {
 
     private final ReactApplicationContext reactContext;
     private String TAG = "AdmobileModule";
+    private Callback mRewordSuccess;
+    private Callback mRewordError;
+    private Callback mSplashSuccess;
+    private Callback mSplashError;
 
     public ReactNativeAdmobileModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -39,6 +43,8 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void initAd(String appID,Promise promise) {
         if(this.reactContext!= null){
+            AdCallbackUtils.setCallBack(this);
+
             ReactApplicationContext context = this.reactContext;
             this.reactContext.runOnUiQueueThread(new Runnable() {
                 @Override
@@ -91,6 +97,9 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void splashAd(String adId, Callback successCallback,Callback errorCallback) {
         if(this.reactContext!= null){
+            this.mSplashError = errorCallback;
+            this.mSplashSuccess = successCallback;
+
             Intent intent = new Intent(this.reactContext,SplashAdActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
             intent.putExtra("adId",adId);
@@ -104,6 +113,9 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void rewardVodAd(String adId, Callback successCallback,Callback errorCallback) {
         if(this.reactContext!= null){
+            this.mRewordError = errorCallback;
+            this.mRewordSuccess = successCallback;
+
             Intent intent = new Intent(this.reactContext,RewardVodActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
             intent.putExtra("adId",adId);
@@ -112,5 +124,33 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule {
     }
 
 
+    @Override
+    public void rewordSuccessCallback() {
+        if(this.mRewordSuccess != null) {
+            Log.e("AdmobileModule","rewordSuccessCallback");
+            this.mRewordSuccess.invoke("success");
+        }
+    }
 
+    @Override
+    public void rewordErrorCallback() {
+        Log.e("AdmobileModule","rewordErrorCallback");
+        if(this.mRewordError != null){
+            this.mRewordError.invoke("error");
+        }
+    }
+
+    @Override
+    public void splashSuccessCallback() {
+        if(this.mSplashSuccess != null){
+            this.mSplashSuccess.invoke("success");
+        }
+    }
+
+    @Override
+    public void splashErrorCallback() {
+        if(this.mSplashError != null){
+            this.mSplashError.invoke("error");
+        }
+    }
 }
