@@ -81,6 +81,7 @@ public class SplashAdActivity extends AppCompatActivity {
             @Override
             public void onAdClick(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.e(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                AdCallbackUtils.doSplashSuccessCallback();
             }
 
             @Override
@@ -95,13 +96,14 @@ public class SplashAdActivity extends AppCompatActivity {
                 if (adSuyiError != null) {
                     String failedJson = adSuyiError.toString();
                     Log.e(TAG, "onAdFailed----->" + failedJson);
+                    AdCallbackUtils.doSplashErrorCallback();
+
                 }
 //                jumpMain();
                 mContext.finish();
             }
         });
 
-// 加载开屏广告 TODO
 //        adSuyiSplashAd.loadAd("377b03ea4dff47bda1");
         adSuyiSplashAd.loadAd(mAdId);
     }

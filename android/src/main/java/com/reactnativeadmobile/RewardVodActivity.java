@@ -79,7 +79,6 @@ public class RewardVodActivity extends AppCompatActivity {
                 Log.e(TAG, "onVideoError----->");
                 Log.e(TAG, "广告播放错误回调... ");
                 AdCallbackUtils.doRewordErrorCallback();
-
             }
 
             @Override
