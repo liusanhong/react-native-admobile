@@ -12,7 +12,14 @@
     "react-native-admobile.podspec"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "standard-version",
+    "release:major": "standard-version --release-as major",
+    "release:major_beta": "standard-version --release-as major -p beta",
+    "release:feat": "standard-version --release-as minor",
+    "release:feat_beta": "standard-version --release-as minor -p beta",
+    "release:fix": "standard-version --release-as patch",
+    "release:fix_beta": "standard-version --release-as patch -p beta"
   },
   "repository": {
     "type": "git",
@@ -38,6 +45,7 @@
   },
   "devDependencies": {
     "react": "^16.9.0",
-    "react-native": "^0.61.5"
+    "react-native": "^0.61.5",
+    "standard-version": "^9.3.2"
   }
 }
