@@ -1,7 +1,7 @@
 {
   "name": "react-native-admobile",
   "title": "React Native Admobile",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "react-native-admobile",
   "main": "index.js",
   "files": [
@@ -16,14 +16,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github_account/react-native-admobile.git",
-    "baseUrl": "https://github.com/github_account/react-native-admobile"
+    "url": "git+https://github.com/liusanhong/react-native-admobile.git",
+    "baseUrl": "https://github.com/liusanhong/react-native-admobile"
   },
   "keywords": [
-    "react-native"
+    "react-native",
+    "react-native-admobilie",
+    "admobilie",
+    "rn-admobilie"
   ],
   "author": {
-    "name": "Your Name",
+    "name": "Richard",
     "email": "yourname@email.com"
   },
   "license": "MIT",
