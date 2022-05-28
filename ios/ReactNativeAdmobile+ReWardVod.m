@@ -98,7 +98,7 @@
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     // 4、广告内存回收
-    rewardvodAd = nil;
+    self.rewardvodAd = nil;
 }
 /**
  视频广告信息点击回调
@@ -125,8 +125,14 @@
 - (void)adsy_rewardvodAdDidRewardEffective:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     NSLog(@"=======>%@", rewardvodAd);
     // RN成功回调
-    self.resolve(@{@"posId":rewardvodAd.posId});
-    self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
+    if (self.resolve) {
+        self.resolve(@{@"posId":rewardvodAd.posId});
+
+    }
+    if (self.onSuccess) {
+        self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
+
+    }
 }
 
 /**
@@ -140,7 +146,7 @@
     dispatch_async(dispatch_get_main_queue(), ^{
 //        [self.view makeToast:errorModel.description];
     });
-    rewardvodAd = nil;
+    self.rewardvodAd = nil;
 }
 
 /**
@@ -186,20 +192,6 @@ static char *isReadyToplayKey = &isReadyToplayKey;
 - (BOOL)isReadyToplayKey{
     return [objc_getAssociatedObject(self, isReadyToplayKey) boolValue];
 }
-
-
-static char *posId = "posIdKey";
-
-- (NSString *)posId {
-  return objc_getAssociatedObject(self, &posId);
-
-}
-
-- (void)setPosId:(NSString *)posId{
-  objc_setAssociatedObject(self, &posId, posId, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-
-}
-
 
 
 @end
