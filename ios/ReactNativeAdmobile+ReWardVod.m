@@ -19,14 +19,7 @@
 
 @implementation ReactNativeAdmobile (ReWardVod)
 
-- (UIViewController*) getRootVC {
-    UIViewController *root = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
-    while (root.presentedViewController != nil) {
-        root = root.presentedViewController;
-    }
-    
-    return root;
-}
+
 
 - (void)loadRewardvodAd:(NSString *)posId {
     // 1、初始化激励视频广告
@@ -133,6 +126,7 @@
     NSLog(@"=======>%@", rewardvodAd);
     // RN成功回调
     self.resolve(@{@"posId":rewardvodAd.posId});
+    self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
 }
 
 /**
