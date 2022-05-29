@@ -6,11 +6,10 @@
 //
 
 #import "ReactNativeAdmobile.h"
-#import <ADSuyiSDK/ADSuyiSDKRewardvodAd.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ReactNativeAdmobile (ReWardVod)<ADSuyiSDKRewardvodAdDelegate>
+@interface ReactNativeAdmobile (ReWardVod)
 - (void)loadRewardvodAd:(NSString *)posId;
 @end
 

@@ -7,9 +7,10 @@
 
 #import "ReactNativeAdmobile+ReWardVod.h"
 #import <objc/runtime.h>
+#import <ADSuyiSDK/ADSuyiSDKRewardvodAd.h>
 
 
-@interface ReactNativeAdmobile (ReWardVod)
+@interface ReactNativeAdmobile (ReWardVod)<ADSuyiSDKRewardvodAdDelegate>
 
 @property (nonatomic, strong)ADSuyiSDKRewardvodAd *rewardvodAd;
 @property(nonatomic ,assign) BOOL isReadyToplay;
@@ -182,7 +183,7 @@ static char *rewardvodAdKey = "rewardvodAd";
 
 
 
-static char *isReadyToplayKey = &isReadyToplayKey;
+static char *isReadyToplayKey ="isReadyToplayKey";
 
 - (void)setIsReadyToplay:(BOOL )isReadyToplay {
   objc_setAssociatedObject(self, &isReadyToplayKey, @(isReadyToplay), OBJC_ASSOCIATION_ASSIGN);
