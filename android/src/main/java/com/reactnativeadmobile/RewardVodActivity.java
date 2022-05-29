@@ -58,6 +58,7 @@ public class RewardVodActivity extends AppCompatActivity {
                 Log.e(TAG, "广告获取成功回调... ");
                 RewardVodActivity.this.rewardVodAdInfo = rewardVodAdInfo;
                 Log.e(TAG, "onAdReceive----->");
+//                初始化后开始展示
                 ADSuyiAdUtil.showRewardVodAdConvenient(RewardVodActivity.this, rewardVodAdInfo);
             }
 
@@ -78,6 +79,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onVideoError(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo, ADSuyiError adSuyiError) {
                 Log.e(TAG, "onVideoError----->");
                 Log.e(TAG, "广告播放错误回调... ");
+                RewardVodActivity.this.finish();
                 AdCallbackUtils.doRewordErrorCallback();
             }
 
@@ -85,6 +87,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onReward(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onReward----->");
                 Log.e(TAG, "广告激励发放回调... ");
+                RewardVodActivity.this.finish();
                 AdCallbackUtils.doRewordSuccessCallback();
             }
 
@@ -112,6 +115,7 @@ public class RewardVodActivity extends AppCompatActivity {
                 if (adSuyiError != null) {
                     String failedJosn = adSuyiError.toString();
                     Log.e(TAG, "onAdFailed----->" + failedJosn);
+                    RewardVodActivity.this.finish();
                     AdCallbackUtils.doRewordErrorCallback();
                 }
             }
