@@ -7,6 +7,7 @@
             android:name=".RewardVodActivity"
             android:exported="true" />
         <activity
+            android:theme="@style/adSplash"
             android:name=".SplashAdActivity"
             android:exported="true" />
     </application>
