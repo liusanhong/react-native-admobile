@@ -59,7 +59,7 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
                 reject(@"no_events", @"There were no events", error);
                 NSLog(@"SDK 初始化失败：%@", error.localizedDescription);
             }else {
-                resolve(@[[NSNull null],@"success"]);
+                resolve(@"success");
                 NSLog(@"SDK 初始化成功");
             }
         }];
