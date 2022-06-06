@@ -101,6 +101,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClick(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onAdClick----->");
                 Log.e(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                AdCallbackUtils.doRewordSuccessCallback();
             }
 
             @Override
