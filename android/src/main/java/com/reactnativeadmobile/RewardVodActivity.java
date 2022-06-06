@@ -87,7 +87,6 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onReward(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onReward----->");
                 Log.e(TAG, "广告激励发放回调... ");
-                RewardVodActivity.this.finish();
                 AdCallbackUtils.doRewordSuccessCallback();
             }
 
