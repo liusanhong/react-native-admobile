@@ -3,6 +3,8 @@
 #import <ADSuyiSDK/ADSuyiSDK.h>
 #import <ADSuyiKit/ADSuyiKitLogging.h>
 
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
+#import <AdSupport/AdSupport.h>
 #import "ReactNativeAdmobile.h"
 #import "ReactNativeAdmobile+ReWardVod.h"
 #import "ReactNativeAdmobile+SplashVod.h"
@@ -35,16 +37,29 @@ RCT_EXPORT_METHOD(sampleMethod:(NSString *)stringArgument numberParameter:(nonnu
 }
 
 
-RCT_EXPORT_METHOD(initAd:(NSString*)appId)
+RCT_EXPORT_METHOD(initAd:(NSString*)appId
+                  resolver:(RCTPromiseResolveBlock)resolve
+                   rejecter:(RCTPromiseRejectBlock)reject)
 {
+    
 //    3617738
     dispatch_async(dispatch_get_main_queue(), ^{
+     if (@available(iOS 14, *)) {
+            [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+                // 无需对授权状态进行处理
+            }];
+        } else {
+            // Fallback on earlier versions
+        }
+        
         [ADSuyiSDK setLogLevel:ADSuyiKitLogLevelDebug];
         // ADSuyiSDK初始化
         [ADSuyiSDK initWithAppId:appId completionBlock:^(NSError * _Nonnull error) {
             if (error) {
+                reject(@"no_events", @"There were no events", error);
                 NSLog(@"SDK 初始化失败：%@", error.localizedDescription);
             }else {
+                resolve(@[[NSNull null],@"success"]);
                 NSLog(@"SDK 初始化成功");
             }
         }];
