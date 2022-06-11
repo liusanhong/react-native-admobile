@@ -124,6 +124,18 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     }
 
 
+    /**
+     *
+     * @param personalizedAdEnabled
+     */
+    @ReactMethod
+    public void setPersonalizedAdEnabled(boolean personalizedAdEnabled) {
+        if(this.reactContext!= null){
+            ADSuyiSdk.setPersonalizedAdEnabled(personalizedAdEnabled);
+        }
+    }
+
+
     @Override
     public void rewordSuccessCallback() {
         if(this.mRewordSuccess != null) {

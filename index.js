@@ -17,3 +17,7 @@ export function splashAd(adId,onSuccess,onError) {
 export function rewardVodAd(adId,onSuccess,onError) {
   ReactNativeAdmobile.rewardVodAd(adId,onSuccess,onError);
 }
+
+export function setPersonalizedAdEnabled(personalizedAdEnabled=false) {
+  ReactNativeAdmobile.setPersonalizedAdEnabled(personalizedAdEnabled);
+}
