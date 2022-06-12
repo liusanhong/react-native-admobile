@@ -129,7 +129,11 @@ RCT_EXPORT_METHOD(nativeAd:(NSString*)vodId
 
 }
 
-RCT_EXPORT_METHOD(nativeAd:(BOOL)personalizedAdEnabled) {
+
+/**
+ 个性化设置
+ */
+RCT_EXPORT_METHOD(setPersonalizedAdEnabled:(BOOL)personalizedAdEnabled) {
 
     dispatch_async(dispatch_get_main_queue(), ^{
         ADSuyiSDK.enablePersonalAd = personalizedAdEnabled;
