@@ -5,15 +5,18 @@
 //  Created by zhoukai on 2022/5/25.
 //
 
-#import "RNADmobileManager.h"
+#import "RNBannerADManager.h"
 #import "RNAdmobileBanner.h"
+#import "RNBannerADEmitter.h"
 #import <ADSuyiSDK/ADSuyiSDKBannerAdView.h>
 
-@interface  RNADmobileManager ()<ADSuyiSDKBannerAdViewDelegate>
+@interface  RNBannerADManager ()<ADSuyiSDKBannerAdViewDelegate>
+
+@property (nonatomic, strong) RNBannerADEmitter *emitter;
 
 @end
 
-@implementation RNADmobileManager
+@implementation RNBannerADManager
 
 - (UIViewController*) getRootVC {
     UIViewController *root = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
@@ -25,7 +28,7 @@
 }
 
 
-RCT_EXPORT_MODULE(RNADmobile)
+RCT_EXPORT_MODULE(RNBannerAD)
 
 //RCT_EXPORT_VIEW_PROPERTY(posId, NSString) //该方法仅处理自带属性，需要视图那边重写set方法
 
@@ -40,9 +43,10 @@ RCT_CUSTOM_VIEW_PROPERTY(posId,NSString,RNAdmobileBanner) { //处理自定义属
 {
     //RNAdmobileBanner 使用包裹一次的原因是因为无法重写ADSuyiSDKBannerAdView 的posId set方法
     RNAdmobileBanner *banner  =  [[RNAdmobileBanner alloc] init];
-    banner.banner = [[ADSuyiSDKBannerAdView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 100)];
+    banner.banner = [[ADSuyiSDKBannerAdView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 58)];
     banner.banner.delegate = self;
     banner.banner.controller = [self getRootVC];
+    self.emitter = [RNBannerADEmitter allocWithZone: nil];
     return banner;
 }
 
@@ -68,6 +72,8 @@ RCT_CUSTOM_VIEW_PROPERTY(posId,NSString,RNAdmobileBanner) { //处理自定义属
     NSLog(@"adsy_bannerViewFailToReceived:%@, %@",errorModel.errorDescription, errorModel.errorDetailDict);
 //    [_bannerView removeFromSuperview];
 //    _bannerView = nil;
+    
+    [self.emitter bannerViewFailToReceived];
 }
 
 /**

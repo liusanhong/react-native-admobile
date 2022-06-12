@@ -8,6 +8,7 @@
 #import "ReactNativeAdmobile.h"
 #import "ReactNativeAdmobile+ReWardVod.h"
 #import "ReactNativeAdmobile+SplashVod.h"
+#import "ReactNativeAdmobile+NativeVod.h"
 
 @interface ReactNativeAdmobile ()
 
@@ -42,7 +43,6 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
                    rejecter:(RCTPromiseRejectBlock)reject)
 {
     
-//    3617738
     dispatch_async(dispatch_get_main_queue(), ^{
      if (@available(iOS 14, *)) {
             [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
@@ -67,6 +67,9 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
 
 }
 
+/**
+开屏广告
+ */
 RCT_EXPORT_METHOD(splashAd:(NSString*)vodId
                   :(RCTResponseSenderBlock)onSuccess
                   :(RCTResponseSenderBlock)onError) {
@@ -77,8 +80,12 @@ RCT_EXPORT_METHOD(splashAd:(NSString*)vodId
     });
 
 }
+/**
+ 激励广告
+ 使用promise的方式
 
-//使用promise的方式
+ */
+
 RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
                  resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
@@ -90,7 +97,12 @@ RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
     });
 
 }
-// 回调方式
+
+/**
+ 激励广告
+  回调方式
+
+ */
 RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
                   :(RCTResponseSenderBlock)onSuccess
                   :(RCTResponseSenderBlock)onError) {
@@ -101,5 +113,31 @@ RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
     });
 
 }
+
+/**
+ 
+ 信息流广告
+ */
+RCT_EXPORT_METHOD(nativeAd:(NSString*)vodId
+                  :(RCTResponseSenderBlock)onSuccess
+                  :(RCTResponseSenderBlock)onError) {
+    self.onSuccess = onSuccess;
+    self.onError= onError;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self loadNativeAd:vodId];
+    });
+
+}
+
+RCT_EXPORT_METHOD(nativeAd:(BOOL)personalizedAdEnabled) {
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        ADSuyiSDK.enablePersonalAd = personalizedAdEnabled;
+        
+    });
+
+}
+
+
 
 @end

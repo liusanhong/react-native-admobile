@@ -5,7 +5,6 @@
 //  Created by zhoukai on 2022/5/25.
 //
 
-#import "RCTViewManager.h"
 #import <ADSuyiSDK/ADSuyiSDKBannerAdView.h>
 #import <UIKit/UIKit.h>
 NS_ASSUME_NONNULL_BEGIN

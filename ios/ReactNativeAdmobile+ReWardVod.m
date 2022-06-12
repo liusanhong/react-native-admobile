@@ -140,7 +140,6 @@
     }
     if (self.onSuccess) {
         self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
-
     }
 }
 
