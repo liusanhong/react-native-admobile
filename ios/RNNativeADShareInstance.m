@@ -30,9 +30,10 @@
  
 -(id) initWith:(UIView *) view
 {
-    if (self = [super init]) {
-        self.adView = view;
-    }
+//    if (self = [super init]) {
+//        self.adView = view;
+//    }
+    self.adView = view;
     return self;
 }
 

@@ -9,7 +9,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RNNativeADEmitter : RCTEventEmitter
+@interface RNNativeADEmitter : RCTEventEmitter<RCTBridgeModule>
+
+- (void)nativeViewRenderOrRegistSuccess:(CGSize)size;
+- (void)nativeViewClostButtonClick;
 
 @end
 

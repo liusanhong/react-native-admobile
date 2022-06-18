@@ -11,8 +11,11 @@
 #import <ADSuyiKit/UIFont+ADSuyiKit.h>
 #import <ADSuyiKit/UIColor+ADSuyiKit.h>
 #import "RNNativeADShareInstance.h"
+#import "RNNativeADEmitter.h"
+
 @interface ReactNativeAdmobile (NativeVod)<ADSuyiSDKNativeAdDelegate>
 @property (nonatomic, strong)ADSuyiSDKNativeAd *nativeAd;
+@property (nonatomic, strong)RNNativeADEmitter *emitter;
 
 @end
 
@@ -20,13 +23,13 @@
 @implementation ReactNativeAdmobile (NativeVod)
 
 - (void)loadNativeAd:(NSString *)posId{
-    
+    self.emitter = [RNNativeADEmitter allocWithZone:nil];
     self.nativeAd = [[ADSuyiSDKNativeAd alloc] initWithAdSize:CGSizeMake([UIScreen mainScreen].bounds.size.width, 100)];
     // 2、传入posId，重要
     self.nativeAd.delegate = self;
     self.nativeAd.controller = [self getRootVC];
     self.nativeAd.posId = posId;
-    [self.nativeAd load:5];
+    [self.nativeAd load:1];
 }
 
 #pragma ADSuyiSDKNativeAdDelegate
@@ -47,7 +50,7 @@
         if(adView.renderType == ADSuyiAdapterRenderTypeNative) {
             // 4.1、如果是自渲染类型则可样式自定义(3种示例demo样式见下)
                 // 1、常规样式
-//            [self setUpUnifiedTopImageNativeAdView:adView];
+//            [self setUpUnifiedNativeAdView:adView];
                 // 2、纯图样式
 //            [self setUpUnifiedOnlyImageNativeAdView:adView];
                 // 3、上图下文
@@ -55,9 +58,6 @@
         }
         // 5、注册，自渲染：注册点击事件，模板：render，重要
         [adView adsy_registViews:@[adView]];
-//        [[RNNativeADShareInstance shareInstance] initWith:adView];
-
-        
         
         // 广点通视频信息流广告会给mediaView添加事件，点击会出现半屏广告，以下为广点通官方给予的解决方案
         if([adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]
@@ -90,15 +90,8 @@
     
     // 6、注册或渲染成功，此时高度正常，可以展示
     dispatch_async(dispatch_get_main_queue(), ^{
-     
     [[RNNativeADShareInstance shareInstance] initWith:adView];
-        
-        NSString *width = [NSString stringWithFormat:@"%f", [adView bounds].size.width];
-        NSString *height  = [NSString stringWithFormat:@"%f", [adView bounds].size.height];
-
-        if (self.onSuccess) {
-            self.onSuccess(@[[NSNull null], @{@"width": width,@"height":height}]);
-        }
+    [self.emitter nativeViewRenderOrRegistSuccess:[adView bounds].size];
     });
     
 }
@@ -156,9 +149,12 @@
     UIButton *closeButton = [UIButton new];
     [adView addSubview:closeButton];
     closeButton.frame = CGRectMake(adWidth - 44, 0, 44, 44);
-    [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
+    [closeButton setBackgroundColor:[UIColor colorWithRed:69 green:69 blue:69 alpha:0.7]];
+    [closeButton setTitle:@"去除广告" forState:UIControlStateNormal];
+    
+//    [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
     // adsy_close该方法为协议中方法 直接添加target即可 无需实现
-    [closeButton addTarget:adView action:@selector(adsy_close) forControlEvents:UIControlEventTouchUpInside];
+//    [closeButton addTarget:adView action:@selector(adsy_close) forControlEvents:UIControlEventTouchUpInside];
     
     // 显示logo图片（必要）
     if(![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) { // 优量汇（广点通）会自带logo，不需要添加
@@ -350,14 +346,27 @@
     
     // 展示关闭按钮（必要）
     UIButton *closeButton = [UIButton new];
-    [adView addSubview:closeButton];
+//    [adView addSubview:closeButton];//隐藏X RN 那边实现去除广告
     [adView bringSubviewToFront:closeButton];
-    closeButton.frame = CGRectMake(adWidth - 44, 0, 44, 44);
-    [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
+    closeButton.frame = CGRectMake(adWidth - 54, 0, 54, 18);
+    closeButton.titleLabel.font = [UIFont systemFontOfSize:12];
+    [closeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//    [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
+    [closeButton setBackgroundColor:[UIColor colorWithRed:69/255 green:69/255 blue:69/255 alpha:0.7]];
+    [closeButton setTitle:@"去除广告" forState:UIControlStateNormal];
+    
+    UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:closeButton.bounds byRoundingCorners:UIRectCornerBottomLeft cornerRadii:CGSizeMake(5.0, 5.0)];
+           CAShapeLayer *maskLayer = [CAShapeLayer layer];
+           maskLayer.frame = closeButton.bounds;
+           maskLayer.path = maskPath.CGPath;
+    closeButton.layer.mask = maskLayer;
+
+
     // adsy_close方法为协议中方法 直接添加target即可 无需实现
-    [closeButton addTarget:adView action:@selector(adsy_close) forControlEvents:UIControlEventTouchUpInside];
+    [closeButton addTarget:self action:@selector(adsy_close) forControlEvents:UIControlEventTouchDown];
     
 }
+
 
 
 static char *nativeAdKey = "nativeAd";
@@ -372,6 +381,17 @@ static char *nativeAdKey = "nativeAd";
 
 }
 
+static char *emitterKey = "emitter";
 
+- (RNNativeADEmitter *)emitter {
+  return objc_getAssociatedObject(self, &emitterKey);
+
+}
+
+- (void)setEmitter:(RNNativeADEmitter *)emitter {
+  objc_setAssociatedObject(self, &emitterKey, emitter, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+}
 
 @end
+
