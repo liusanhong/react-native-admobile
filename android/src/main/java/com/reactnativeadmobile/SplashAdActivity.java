@@ -35,7 +35,7 @@ public class SplashAdActivity extends AppCompatActivity {
 
 // 底部logo容器高度，请根据实际情况进行计算
 //        TODO
-        int logoHeight = 50;
+        int logoHeight = 0;
 // 屏幕宽度px
         int widthPixels = getResources().getDisplayMetrics().widthPixels;
 // 屏幕高度px

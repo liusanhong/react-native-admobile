@@ -12,21 +12,29 @@ public class AdCallbackUtils {
 
     public static void doRewordErrorCallback(){
 //        String info = "这里CallBackUtils即将发送的数据。";
-        mCallBack.rewordErrorCallback();
+        if(mCallBack != null){
+            mCallBack.rewordErrorCallback();
+        }
     }
 
     public static void doRewordSuccessCallback(){
-        mCallBack.rewordSuccessCallback();
+        if(mCallBack != null){
+            mCallBack.rewordSuccessCallback();
+        }
     }
 
 
     public static void doSplashErrorCallback(){
 //        String info = "这里CallBackUtils即将发送的数据。";
-        mCallBack.splashErrorCallback();
+        if(mCallBack!=null){
+            mCallBack.splashErrorCallback();
+        }
     }
 
     public static void doSplashSuccessCallback(){
-        mCallBack.splashSuccessCallback();
+        if(mCallBack != null){
+            mCallBack.splashSuccessCallback();
+        }
     }
 
 }
