@@ -59,7 +59,8 @@ RCT_CUSTOM_VIEW_PROPERTY(posId,NSString,RNAdmobileBanner) { //处理自定义属
  @param bannerView banner实例
  */
 - (void)adsy_bannerViewDidReceived:(ADSuyiSDKBannerAdView *)bannerView{
-    
+    [self.emitter bannerViewDidReceived];
+
 }
 
 /**

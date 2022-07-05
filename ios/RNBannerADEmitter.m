@@ -26,12 +26,18 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[@"bannerViewFailAction"];
+  return @[@"bannerViewFailAction",@"bannerViewDidReceived"];
 }
+
 
 - (void)bannerViewFailToReceived {
     dispatch_async(dispatch_get_main_queue(), ^{
     [self sendEventWithName:@"bannerViewFailAction" body:nil];
+    });
+}
+- (void)bannerViewDidReceived {
+    dispatch_async(dispatch_get_main_queue(), ^{
+    [self sendEventWithName:@"bannerViewDidReceived" body:nil];
     });
 }
 @end
