@@ -78,6 +78,9 @@
  */
 - (void)adsy_nativeAdFailToLoad:(ADSuyiSDKNativeAd *)nativeAd
                      errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
+    if (self.onError) {
+        self.onError(@[[NSNull null]]);
+    }
     
 }
 
@@ -102,7 +105,9 @@
  @param adView 广告视图
  */
 - (void)adsy_nativeAdViewRenderOrRegistFail:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView{
-    
+    if (self.onError) {
+        self.onError(@[[NSNull null]]);
+    }
 }
 
 /**

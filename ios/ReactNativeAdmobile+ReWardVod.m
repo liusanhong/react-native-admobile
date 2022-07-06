@@ -150,6 +150,10 @@
  @param errorModel 具体错误信息
  */
 - (void)adsy_rewardvodAdFailToLoad:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
+    if (self.onError) {
+        self.onError(@[[NSNull null]]);
+    }
+    
     // 4、广告内存回收
     dispatch_async(dispatch_get_main_queue(), ^{
 //        [self.view makeToast:errorModel.description];
@@ -164,7 +168,9 @@
  @param errorModel 具体错误信息
  */
 - (void)adsy_rewardvodAdPlaying:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
-    
+    if (self.onError) {
+        self.onError(@[[NSNull null]]);
+    }
 }
 
 - (void)adsy_rewardvodAdServerDidSucceed:(ADSuyiSDKRewardvodAd *)rewardvodAd {
@@ -172,6 +178,9 @@
 }
 
 - (void)adsy_rewardvodAdServerDidFailed:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
+    if (self.onError) {
+        self.onError(@[[NSNull null]]);
+    }
     
 }
 
