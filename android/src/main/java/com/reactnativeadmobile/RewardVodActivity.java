@@ -80,7 +80,7 @@ public class RewardVodActivity extends AppCompatActivity {
                 Log.e(TAG, "onVideoError----->");
                 Log.e(TAG, "广告播放错误回调... ");
                 RewardVodActivity.this.finish();
-                AdCallbackUtils.doRewordErrorCallback();
+//                AdCallbackUtils.doRewordErrorCallback();
             }
 
             @Override
@@ -100,7 +100,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClick(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onAdClick----->");
                 Log.e(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
-                AdCallbackUtils.doRewordSuccessCallback();
+//                AdCallbackUtils.doRewordSuccessCallback();
             }
 
             @Override
