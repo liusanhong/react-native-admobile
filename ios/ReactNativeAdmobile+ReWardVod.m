@@ -168,9 +168,9 @@
  @param errorModel 具体错误信息
  */
 - (void)adsy_rewardvodAdPlaying:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
-    if (self.onError) {
-        self.onError(@[[NSNull null]]);
-    }
+//    if (self.onError) {
+//        self.onError(@[[NSNull null]]);
+//    }
 }
 
 - (void)adsy_rewardvodAdServerDidSucceed:(ADSuyiSDKRewardvodAd *)rewardvodAd {
