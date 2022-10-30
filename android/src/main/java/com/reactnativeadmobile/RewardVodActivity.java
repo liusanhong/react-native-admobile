@@ -19,7 +19,7 @@ public class RewardVodActivity extends AppCompatActivity {
     private String TAG = "RewardVodActivity";
     ADSuyiRewardVodAd rewardVodAd;
     private ADSuyiRewardVodAdInfo rewardVodAdInfo;
-    String mAdId ;
+    String mAdId;
 
 
     @Override
@@ -29,7 +29,12 @@ public class RewardVodActivity extends AppCompatActivity {
         mAdId = getIntent().getStringExtra("adId");
 
         // 创建激励视频广告实例
-        rewardVodAd = new ADSuyiRewardVodAd(this);
+        try {
+            rewardVodAd = new ADSuyiRewardVodAd(this);
+        } catch (Exception e) {
+            RewardVodActivity.this.finish();
+        }
+
 
         ADSuyiRewardExtra adSuyiRewardExtra = new ADSuyiRewardExtra("3798624");
 // 设置激励视频服务端验证的自定义信息
@@ -55,11 +60,16 @@ public class RewardVodActivity extends AppCompatActivity {
             @Override
             public void onAdReceive(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                 // 激励视频广告对象一次成功拉取的广告数据只允许展示一次
-                Log.e(TAG, "广告获取成功回调... ");
-                RewardVodActivity.this.rewardVodAdInfo = rewardVodAdInfo;
-                Log.e(TAG, "onAdReceive----->");
+                try {
+                    Log.e(TAG, "广告获取成功回调... ");
+                    RewardVodActivity.this.rewardVodAdInfo = rewardVodAdInfo;
+                    Log.e(TAG, "onAdReceive----->");
 //                初始化后开始展示
-                ADSuyiAdUtil.showRewardVodAdConvenient(RewardVodActivity.this, rewardVodAdInfo);
+                    ADSuyiAdUtil.showRewardVodAdConvenient(RewardVodActivity.this, rewardVodAdInfo);
+
+                } catch (Exception e) {
+                    RewardVodActivity.this.finish();
+                }
             }
 
             @Override
