@@ -64,6 +64,13 @@ public class SplashAdActivity extends AppCompatActivity {
                 // 如果没有设置自定义跳过按钮不会回调该方法（单位为秒）
                 Log.e(TAG, "倒计时剩余时长（单位秒）" + countdownSeconds);
             }
+
+            @Override
+            public void onReward(ADSuyiAdInfo adSuyiAdInfo) {
+                // 目前仅仅优量汇渠道会被使用
+                Log.d(TAG, "广告奖励回调... ");
+            }
+
             @Override
             public void onAdSkip(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.e(TAG, "广告跳过回调，不一定准确，埋点数据仅供参考... ");
