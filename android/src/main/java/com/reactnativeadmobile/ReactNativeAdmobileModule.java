@@ -12,8 +12,14 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 import cn.admobiletop.adsuyi.ADSuyiSdk;
+import cn.admobiletop.adsuyi.ad.ADSuyiInterstitialAd;
+import cn.admobiletop.adsuyi.ad.data.ADSuyiInterstitialAdInfo;
+import cn.admobiletop.adsuyi.ad.entity.ADSuyiExtraParams;
+import cn.admobiletop.adsuyi.ad.error.ADSuyiError;
+import cn.admobiletop.adsuyi.ad.listener.ADSuyiInterstitialAdListener;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
+import cn.admobiletop.adsuyi.util.ADSuyiAdUtil;
 
 public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implements AdCallback {
 
@@ -46,7 +52,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
             AdCallbackUtils.setCallBack(this);
 
             ReactApplicationContext context = this.reactContext;
-            this.reactContext.runOnUiQueueThread(new Runnable() {
+            reactContext.runOnUiQueueThread(new Runnable() {
                 @Override
                 public void run() {
                     Log.e("initAd::",appID);
@@ -104,6 +110,73 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
             intent.putExtra("adId",adId);
             this.reactContext.startActivity(intent);
+        }
+    }
+
+    @ReactMethod
+    public void intertitialAd(String adId, Callback successCallback,Callback errorCallback) {
+        if(this.reactContext!= null){
+            reactContext.runOnUiQueueThread(new Runnable() {
+                @Override
+                public void run() {
+                    ADSuyiInterstitialAd interstitialAd = new ADSuyiInterstitialAd(reactContext.getCurrentActivity());
+// 创建额外参数实例
+                    ADSuyiExtraParams extraParams = new ADSuyiExtraParams.Builder()
+                            // 设置视频类广告是否静音（部分渠道支持）
+                            .setVideoWithMute(false)
+                            .build();
+                    interstitialAd.setLocalExtraParams(extraParams);
+
+                    // 设置插屏广告监听
+                    interstitialAd.setListener(new ADSuyiInterstitialAdListener() {
+
+                        @Override
+                        public void onAdReceive(ADSuyiInterstitialAdInfo interstitialAdInfo) {
+                            // 插屏广告对象一次成功拉取的广告数据只允许展示一次
+//                    InterstitialAdActivity.this.interstitialAdInfo = interstitialAdInfo;
+                            Log.d(TAG, "onAdReceive----->");
+                            Log.d(TAG, "广告获取成功回调... ");
+                        }
+
+                        @Override
+                        public void onAdReady(ADSuyiInterstitialAdInfo interstitialAdInfo) {
+                            // 建议在该回调之后展示广告
+                            Log.d(TAG, "onAdReady----->");
+                            Log.d(TAG, "广告准备完毕回调... ");
+                            // 插屏的展示，由于插屏的获取是异步的，请在onAdReceive后调用该方法对插屏进行展示
+                            ADSuyiAdUtil.showInterstitialAdConvenient(reactContext.getCurrentActivity(), interstitialAdInfo);
+                        }
+
+                        @Override
+                        public void onAdExpose(ADSuyiInterstitialAdInfo interstitialAdInfo) {
+                            Log.d(TAG, "onAdExpose----->");
+                            Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                        }
+
+                        @Override
+                        public void onAdClick(ADSuyiInterstitialAdInfo interstitialAdInfo) {
+                            Log.d(TAG, "onAdClick----->");
+                            Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                        }
+
+                        @Override
+                        public void onAdClose(ADSuyiInterstitialAdInfo interstitialAdInfo) {
+                            Log.d(TAG, "onAdClose----->");
+                            Log.d(TAG, "广告点击关闭回调");
+                        }
+
+                        @Override
+                        public void onAdFailed(ADSuyiError adSuyiError) {
+                            if (adSuyiError != null) {
+                                String failedJson = adSuyiError.toString();
+                                Log.d(TAG, "onAdFailed----->" + failedJson);
+                            }
+                        }
+                    });
+                    interstitialAd.loadAd(adId);
+                }
+            });
+
         }
     }
 
