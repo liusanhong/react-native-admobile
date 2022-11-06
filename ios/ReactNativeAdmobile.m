@@ -9,6 +9,7 @@
 #import "ReactNativeAdmobile+ReWardVod.h"
 #import "ReactNativeAdmobile+SplashVod.h"
 #import "ReactNativeAdmobile+NativeVod.h"
+#import "ReactNativeAdmobile+IntertitialAd.h"
 
 @interface ReactNativeAdmobile ()
 
@@ -128,6 +129,22 @@ RCT_EXPORT_METHOD(nativeAd:(NSString*)vodId
     });
 
 }
+
+/**
+ 
+ 信息流广告
+ */
+RCT_EXPORT_METHOD(intertitialAd:(NSString*)vodId
+                  :(RCTResponseSenderBlock)onSuccess
+                  :(RCTResponseSenderBlock)onError) {
+    self.onSuccess = onSuccess;
+    self.onError= onError;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self loadIntertitialAd:vodId];
+    });
+
+}
+
 
 
 /**
