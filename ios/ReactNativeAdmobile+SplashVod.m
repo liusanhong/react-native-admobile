@@ -8,6 +8,8 @@
 #import "ReactNativeAdmobile+SplashVod.h"
 #import <ADSuyiSDK/ADSuyiSDKSplashAd.h>
 #import <objc/runtime.h>
+#import <ADSuyiKit/ADSuyiKit.h>
+
 
 @interface ReactNativeAdmobile (SplashVod)<ADSuyiSDKSplashAdDelegate>
 @property (nonatomic, strong)ADSuyiSDKSplashAd *splashAd;
@@ -39,9 +41,9 @@
     */
     self.splashAd.tolerateTimeout = 4;
     // 3、设置默认启动图(一般设置启动图的平铺颜色为背景颜色，使得视觉效果更加平滑)
-//    self.splashAd.backgroundColor = [UIColor adsy_getColorWithImage:[UIImage imageNamed:@"750x1334.png"] withNewSize:[UIScreen mainScreen].bounds.size];
-  self.splashAd.backgroundColor =[UIColor whiteColor];
-    
+   self.splashAd.backgroundColor = [UIColor adsy_getColorWithImage:[UIImage imageNamed:@"launch.png"] withNewSize:[UIScreen mainScreen].bounds.size];
+//   self.splashAd.backgroundColor =[UIColor whiteColor];
+
 //    // 4、开屏广告机型适配
 //    CGFloat bottomViewHeight;
 //    if (kADSYCurveScreen) { // 刘海屏
@@ -49,7 +51,7 @@
 //    } else {
 //        bottomViewHeight = [UIScreen mainScreen].bounds.size.height - [UIScreen mainScreen].bounds.size.width * (960 / 640.0);
 //    }
-    
+
 //    // 5、底部视图设置，非必选项
 //    UIView *bottomView = [[UIView alloc] init];
 //    bottomView.backgroundColor = [UIColor whiteColor];
@@ -57,7 +59,7 @@
 //    UIImageView *logoImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"ADMob_Logo.png"]];
 //    logoImageView.frame = CGRectMake(([UIScreen mainScreen].bounds.size.width-135)/2, (bottomViewHeight-46)/2, 135, 46);
 //    [bottomView addSubview:logoImageView];
-    
+
     // 6、设置开屏保底逻辑（可选）
     /**
      *功能说明：App在首次启动时，需要先请求获取广告位配置文件后，然后再去请求开屏广告，也就是首次加载开屏广告时需要两次串行网络请求，因此很容易因超时导致开屏广告展示失败。
@@ -74,7 +76,7 @@
 #pragma mark - ADSuyiSDKSplashAdDelegate
 /**
  开屏展现成功
- 
+
  @param splashAd 广告实例
  */
 - (void)adsy_splashAdSuccessToPresentScreen:(ADSuyiSDKSplashAd *)splashAd{
@@ -88,7 +90,7 @@
 
 /**
  开屏展现失败
- 
+
  @param splashAd 广告实例
  @param error 具体错误信息
  */
@@ -98,16 +100,16 @@
 
 /**
  开屏广告点击
- 
+
  @param splashAd 广告实例
  */
 - (void)adsy_splashAdClicked:(ADSuyiSDKSplashAd *)splashAd{
-    
+
 }
 
 /**
  开屏被关闭
- 
+
  @param splashAd 广告实例
  */
 - (void)adsy_splashAdClosed:(ADSuyiSDKSplashAd *)splashAd{
@@ -121,11 +123,11 @@
 
 /**
  开屏展示
- 
+
  @param splashAd 广告实例
  */
 - (void)adsy_splashAdEffective:(ADSuyiSDKSplashAd *)splashAd{
-    
+
 }
 
 
