@@ -24,7 +24,7 @@
     while (root.presentedViewController != nil) {
         root = root.presentedViewController;
     }
-    
+
     return root;
 }
 
@@ -43,7 +43,7 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
                   resolver:(RCTPromiseResolveBlock)resolve
                    rejecter:(RCTPromiseRejectBlock)reject)
 {
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
      if (@available(iOS 14, *)) {
             [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
@@ -52,7 +52,7 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
         } else {
             // Fallback on earlier versions
         }
-        
+
         [ADSuyiSDK setLogLevel:ADSuyiKitLogLevelDebug];
         // ADSuyiSDK初始化
         [ADSuyiSDK initWithAppId:appId completionBlock:^(NSError * _Nonnull error) {
@@ -116,7 +116,7 @@ RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
 }
 
 /**
- 
+
  信息流广告
  */
 RCT_EXPORT_METHOD(nativeAd:(NSString*)vodId
@@ -131,14 +131,14 @@ RCT_EXPORT_METHOD(nativeAd:(NSString*)vodId
 }
 
 /**
- 
+
  信息流广告
  */
 RCT_EXPORT_METHOD(intertitialAd:(NSString*)vodId
                   :(RCTResponseSenderBlock)onSuccess
                   :(RCTResponseSenderBlock)onError) {
-    self.onSuccess = onSuccess;
-    self.onError= onError;
+//     self.onSuccess = onSuccess;
+//     self.onError= onError;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self loadIntertitialAd:vodId];
     });
@@ -154,7 +154,7 @@ RCT_EXPORT_METHOD(setPersonalizedAdEnabled:(BOOL)personalizedAdEnabled) {
 
     dispatch_async(dispatch_get_main_queue(), ^{
         ADSuyiSDK.enablePersonalAd = personalizedAdEnabled;
-        
+
     });
 
 }

@@ -34,7 +34,7 @@
 #pragma mark - ADSuyiSDKIntertitialAdDelegate
 /**
  ADSuyiSDKIntertitialAd请求成功回调
- 
+
  @param interstitialAd 插屏广告实例对象
 */
 - (void)adsy_interstitialAdSuccedToLoad:(ADSuyiSDKIntertitialAd *)interstitialAd{
@@ -55,9 +55,9 @@
 - (void)adsy_interstitialAdFailedToLoad:(ADSuyiSDKIntertitialAd *)interstitialAd error:(ADSuyiAdapterErrorDefine *)error{
     // 4、内存回收
 //    [self.view makeToast:error.description];
-    if (self.onError) {
-        self.onError(@[[NSNull null]]);
-    }
+//     if (self.onError) {
+//         self.onError(@[[NSNull null]]);
+//     }
     self.intertitialAd = nil;
 }
 
@@ -67,9 +67,9 @@
  @param interstitialAd 插屏广告实例对象
 */
 - (void)adsy_interstitialAdDidPresent:(ADSuyiSDKIntertitialAd *)interstitialAd{
-    if (self.onSuccess) {
-        self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
-    }
+//     if (self.onSuccess) {
+//         self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
+//     }
 }
 
 /**
@@ -79,9 +79,9 @@
 */
 - (void)adsy_interstitialAdFailedToPresent:(ADSuyiSDKIntertitialAd *)interstitialAd error:(NSError *)error{
 //    [self.view makeToast:error.description];
-    if (self.onError) {
-        self.onError(@[[NSNull null]]);
-    }
+//     if (self.onError) {
+//         self.onError(@[[NSNull null]]);
+//     }
 }
 
 /**
@@ -90,9 +90,14 @@
  @param interstitialAd 插屏广告实例对象
 */
 - (void)adsy_interstitialAdDidClick:(ADSuyiSDKIntertitialAd *)interstitialAd{
-    if (self.onSuccess) {
-        self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
-    }
+//     if (self.onSuccess) {
+//         self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
+//     }
+
+
+
+
+
 }
 
 /**
@@ -107,22 +112,22 @@
 
 /**
  ADSuyiSDKIntertitialAd展示回调
- 
+
  @param interstitialAd 广告实例
  */
 - (void)adsy_interstitialAdExposure:(ADSuyiSDKIntertitialAd *)interstitialAd{
-    if (self.onSuccess) {
-        self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
-    }
+//    if (self.onSuccess) {
+//        self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
+//    }
 }
 
 /**
  ADSuyiSDKIntertitialAd关闭落地页回调
- 
+
  @param interstitialAd 广告实例
  */
 -(void)adsy_interstitialAdCloseLandingPage:(ADSuyiSDKIntertitialAd *)interstitialAd{
-    
+
 }
 
 
