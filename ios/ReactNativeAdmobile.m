@@ -54,6 +54,8 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
         }
 
         [ADSuyiSDK setLogLevel:ADSuyiKitLogLevelDebug];
+//        [ADSuyiSDK setOnlyPlatform:ADSuyiAdapterPlatformGDT];
+        
         // ADSuyiSDK初始化
         [ADSuyiSDK initWithAppId:appId completionBlock:^(NSError * _Nonnull error) {
             if (error) {

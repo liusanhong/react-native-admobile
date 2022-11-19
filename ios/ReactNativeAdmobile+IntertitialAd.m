@@ -108,6 +108,9 @@
 - (void)adsy_interstitialAdDidClose:(ADSuyiSDKIntertitialAd *)interstitialAd{
     // 4、内存回收
     self.intertitialAd = nil;
+    if (self.onSuccess) {
+        self.onSuccess(@[[NSNull null], @{@"posId":interstitialAd.posId}]);
+    }
 }
 
 /**
