@@ -139,8 +139,8 @@ RCT_EXPORT_METHOD(nativeAd:(NSString*)vodId
 RCT_EXPORT_METHOD(intertitialAd:(NSString*)vodId
                   :(RCTResponseSenderBlock)onSuccess
                   :(RCTResponseSenderBlock)onError) {
-//     self.onSuccess = onSuccess;
-//     self.onError= onError;
+     self.onSuccess = onSuccess;
+     self.onError= onError;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self loadIntertitialAd:vodId];
     });
