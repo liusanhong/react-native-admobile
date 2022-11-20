@@ -163,6 +163,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                         public void onAdClose(ADSuyiInterstitialAdInfo interstitialAdInfo) {
                             Log.d(TAG, "onAdClose----->");
                             Log.d(TAG, "广告点击关闭回调");
+                            successCallback.invoke("success");
                         }
 
                         @Override
