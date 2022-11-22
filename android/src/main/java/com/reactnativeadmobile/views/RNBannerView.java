@@ -8,7 +8,12 @@ import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.Nullable;
+
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.reactnativeadmobile.R;
 import com.reactnativeadmobile.utils.Utils;
 
@@ -26,6 +31,16 @@ public class RNBannerView extends LinearLayout {
     private String _codeId = null;
     private String TAG = "RNBannerView";
     ADSuyiBannerAd suyiBannerAd;
+
+
+    private void sendEvent(ReactContext reactContext,
+                           String eventName,
+                           @Nullable WritableMap params) {
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(eventName, params);
+    }
+
 
 
     public RNBannerView(ReactContext context) {
@@ -71,6 +86,9 @@ public class RNBannerView extends LinearLayout {
             @Override
             public void onAdExpose(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                WritableMap params = Arguments.createMap();
+                params.putString("result", "success");
+                sendEvent(reactContext, "bannerViewDidReceived", params);
             }
 
             @Override
@@ -88,6 +106,10 @@ public class RNBannerView extends LinearLayout {
                 if (adSuyiError != null) {
                     String failedJson = adSuyiError.toString();
                     Log.d(TAG, "onAdFailed----->" + failedJson);
+                    WritableMap params = Arguments.createMap();
+                    params.putString("result", "success");
+                    sendEvent(reactContext, "bannerViewFailAction", params);
+
                 }
             }
         });
