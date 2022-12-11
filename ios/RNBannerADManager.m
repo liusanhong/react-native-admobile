@@ -33,17 +33,26 @@ RCT_EXPORT_MODULE(RNBannerAD)
 //RCT_EXPORT_VIEW_PROPERTY(posId, NSString) //该方法仅处理自带属性，需要视图那边重写set方法
 
 RCT_CUSTOM_VIEW_PROPERTY(posId,NSString,RNAdmobileBanner) { //处理自定义属性，
+
     view.banner.posId = json;
     [view addSubview:view.banner];
     [view.banner loadAndShowWithError:nil];
 
+}
+
+
+RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属性，
+    view.banner.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [[NSString stringWithFormat:@"%@",json] floatValue]);
+    view.banner.posId = json;
+    [view addSubview:view.banner];
     
+
 }
 - (UIView *)view
 {
     //RNAdmobileBanner 使用包裹一次的原因是因为无法重写ADSuyiSDKBannerAdView 的posId set方法
     RNAdmobileBanner *banner  =  [[RNAdmobileBanner alloc] init];
-    banner.banner = [[ADSuyiSDKBannerAdView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 58)];
+    banner.banner =[[ADSuyiSDKBannerAdView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width,58)];
     banner.banner.delegate = self;
     banner.banner.controller = [self getRootVC];
     self.emitter = [RNBannerADEmitter allocWithZone: nil];
