@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
   s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/tianmu"
   s.dependency 'ADSuyiSDK/ADSuyiSDKPlatforms/bu' # 穿山甲(头条)
   s.dependency 'ADSuyiSDK/ADSuyiSDKPlatforms/gdt' # 优量汇(广点通）
-  s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/admobile"
+#   s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/admobile"
 
 end
 
