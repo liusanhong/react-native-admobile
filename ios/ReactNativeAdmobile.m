@@ -55,7 +55,7 @@ RCT_EXPORT_METHOD(initAd:(NSString*)appId
 
         [ADSuyiSDK setLogLevel:ADSuyiKitLogLevelDebug];
 //        [ADSuyiSDK setOnlyPlatform:ADSuyiAdapterPlatformGDT];
-        
+
         // ADSuyiSDK初始化
         [ADSuyiSDK initWithAppId:appId completionBlock:^(NSError * _Nonnull error) {
             if (error) {
@@ -89,17 +89,17 @@ RCT_EXPORT_METHOD(splashAd:(NSString*)vodId
 
  */
 
-RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
-                 resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-{
-    self.resolve = resolve;
-    self.reject= reject;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self loadRewardvodAd:vodId];
-    });
-
-}
+// RCT_EXPORT_METHOD(rewardVodAd:(NSString*)vodId
+//                  resolver:(RCTPromiseResolveBlock)resolve
+//                   rejecter:(RCTPromiseRejectBlock)reject)
+// {
+//     self.resolve = resolve;
+//     self.reject= reject;
+//     dispatch_async(dispatch_get_main_queue(), ^{
+//         [self loadRewardvodAd:vodId];
+//     });
+//
+// }
 
 /**
  激励广告
