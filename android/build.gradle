@@ -49,7 +49,7 @@ dependencies {
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:tianmu:1.3.3.09261'
     // 注意需要额外添加SDK加固对应的混淆配置，具体内容见（5.4.3 混淆配置），如已配置加固混淆请忽略此提示
 //    implementation 'cn.admobiletop.adsuyi.ad.adapter:androidx-tianmu_enc:1.3.3.09261'
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:tianmu:2.0.5.05231' //7.6
+    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:2.0.5.05231' //7.6
 
     // 艾狄墨搏AdapterSdk，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:admobile-alpha:5.0.7.05171'
