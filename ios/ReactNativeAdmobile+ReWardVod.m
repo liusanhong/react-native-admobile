@@ -39,7 +39,7 @@
 
 - (void)showRewardvodAd {
     if ([self.rewardvodAd rewardvodAdIsReady] && self.isReadyToplay) {
-        [self.rewardvodAd showRewardvodAd];
+        [self.rewardvodAd   showRewardvodAd];
     }
 }
 
@@ -47,16 +47,16 @@
 #pragma mark - ADSuyiSDKRewardvodAdDelegate
 /**
  广告数据加载成功回调
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdLoadSuccess:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-    
+
 }
 
 /**
  激励视频广告准备好被播放
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdReadyToPlay:(ADSuyiSDKRewardvodAd *)rewardvodAd{
@@ -65,36 +65,35 @@
 //        [self.view makeToast:@"激励视频准备完成"];
         [self.rewardvodAd showRewardvodAd];
     });
-    
+
 }
 
 /**
  视频数据下载成功回调，已经下载过的视频会直接回调
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdVideoLoadSuccess:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-    [self.rewardvodAd showRewardvodAd];
 }
 /**
  视频播放页即将展示回调
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdWillVisible:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-    
+
 }
 /**
  视频广告曝光回调
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidVisible:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-    
+
 }
 /**
  视频播放页关闭回调
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
@@ -103,7 +102,7 @@
 }
 /**
  视频广告信息点击回调
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidClick:(ADSuyiSDKRewardvodAd *)rewardvodAd{
@@ -119,16 +118,16 @@
 }
 /**
  视频广告视频播放完成
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidPlayFinish:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-    
+
 }
 
 /**
  视频广告视频达到奖励条件
- 
+
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidRewardEffective:(ADSuyiSDKRewardvodAd *)rewardvodAd{
@@ -145,7 +144,7 @@
 
 /**
  视频广告请求失败回调
- 
+
  @param rewardvodAd 广告实例
  @param errorModel 具体错误信息
  */
@@ -153,7 +152,7 @@
     if (self.onError) {
         self.onError(@[[NSNull null]]);
     }
-    
+
     // 4、广告内存回收
     dispatch_async(dispatch_get_main_queue(), ^{
 //        [self.view makeToast:errorModel.description];
@@ -163,7 +162,7 @@
 
 /**
  视频广告播放时各种错误回调
- 
+
  @param rewardvodAd 广告实例
  @param errorModel 具体错误信息
  */
@@ -174,14 +173,14 @@
 }
 
 - (void)adsy_rewardvodAdServerDidSucceed:(ADSuyiSDKRewardvodAd *)rewardvodAd {
-    
+
 }
 
 - (void)adsy_rewardvodAdServerDidFailed:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
     if (self.onError) {
         self.onError(@[[NSNull null]]);
     }
-    
+
 }
 
 
