@@ -58,6 +58,8 @@ dependencies {
 //    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.492.1362.10271'
     implementation "by.gm_mediation.com:gdt-adapter:4.491.1361.1" //广点通
 
+    // 百度增强版AdapterSdk，可选的
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.30.05261'
 
     // 头条AdapterSdk，可选的
     implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:5.3.0.5.05231'  //7.6
