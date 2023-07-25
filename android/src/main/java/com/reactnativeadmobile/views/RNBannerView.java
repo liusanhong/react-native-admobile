@@ -5,6 +5,7 @@ import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -41,7 +42,20 @@ public class RNBannerView extends LinearLayout {
                 .emit(eventName, params);
     }
 
-
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (isInterceptScroll()) {
+                    // 拦截父布局的事件，这样能够触发穿山甲的滑动点击事件，但视频类素材无法触发
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                break;
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
 
     public RNBannerView(ReactContext context) {
         super(context);
@@ -118,5 +132,9 @@ public class RNBannerView extends LinearLayout {
 //        suyiBannerAd.setSceneId(ADSuyiDemoConstant.BANNER_AD_SCENE_ID);
 // 加载Banner广告，参数为广告位ID，同一个ADSuyiBannerAd只有一次loadAd有效
         suyiBannerAd.loadAd(codeId);
+    }
+
+    private boolean isInterceptScroll() {
+        return true;
     }
 }
