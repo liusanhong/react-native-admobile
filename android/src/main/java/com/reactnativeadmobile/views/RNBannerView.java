@@ -3,11 +3,9 @@ package com.reactnativeadmobile.views;
 import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
 import android.content.Context;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 

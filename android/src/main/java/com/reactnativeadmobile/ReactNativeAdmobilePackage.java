@@ -21,7 +21,8 @@ public class ReactNativeAdmobilePackage implements ReactPackage {
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
 //        return Collections.emptyList();
         return Arrays.<ViewManager>asList(
-                new RNBannerAd(reactContext)
+                new RNBannerAd(reactContext),
+                new RNFlowExpressAd(reactContext)
         );
     }
 }
