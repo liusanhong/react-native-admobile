@@ -119,7 +119,7 @@ public class RNBannerView extends LinearLayout {
                     String failedJson = adSuyiError.toString();
                     Log.d(TAG, "onAdFailed----->" + failedJson);
                     WritableMap params = Arguments.createMap();
-                    params.putString("result", "success");
+                    params.putString("result", "failed");
                     sendEvent(reactContext, "bannerViewFailAction", params);
 
                 }
