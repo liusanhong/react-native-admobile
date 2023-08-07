@@ -156,7 +156,9 @@ public class RNFlowExpressAdView extends LinearLayout {
             public void onAdClose(ADSuyiNativeAdInfo adInfo) {
                 // 广告关闭回调，可在此回调中移除视图和释放广告对象
                 TianmuLogUtil.d(TAG, "onAdClose" + adInfo.toString());
-
+                WritableMap params = Arguments.createMap();
+                params.putString("result", "failed");
+                sendEvent(reactContext, "nativeViewCloseByUser", params);
             }
 
             @Override
