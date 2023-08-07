@@ -25,7 +25,7 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[@"nativeViewRenderOrRegistSuccess"];
+  return @[@"nativeViewRenderOrRegistSuccess",@"nativeViewCloseByUser"];
 }
 
 
@@ -34,6 +34,10 @@ RCT_EXPORT_MODULE();
         [self sendEventWithName:@"nativeViewRenderOrRegistSuccess" body:@{@"width":[NSNumber numberWithFloat:size.width ] , @"height":[NSNumber numberWithFloat:size.height]}];
     });
 }
-
+- (void)nativeViewClostButtonClick{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self sendEventWithName:@"nativeViewCloseByUser" body:nil];
+    });
+}
 
 @end

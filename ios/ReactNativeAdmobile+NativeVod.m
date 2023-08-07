@@ -42,8 +42,8 @@
  */
 - (void)adsy_nativeAdSucessToLoad:(ADSuyiSDKNativeAd *)nativeAd
                       adViewArray:(NSArray<__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *> *)adViewArray{
-    
-    
+
+
     for (UIView<ADSuyiAdapterNativeAdViewDelegate> *adView in adViewArray) {
         // 4、判断信息流广告是否为自渲染类型（可选实现） 可仿照所示样式demo实现 如无所需样式则需自行实现
         // 如果单纯只配置了模版信息流，那么不需要实现，如果配置了自渲染信息流，那么需要实现
@@ -58,7 +58,7 @@
         }
         // 5、注册，自渲染：注册点击事件，模板：render，重要
         [adView adsy_registViews:@[adView]];
-        
+
         // 广点通视频信息流广告会给mediaView添加事件，点击会出现半屏广告，以下为广点通官方给予的解决方案
         if([adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]
            && adView.renderType == ADSuyiAdapterRenderTypeNative
@@ -67,7 +67,7 @@
             mediaView.userInteractionEnabled = NO;
         }
     }
-    
+
 }
 
 /**
@@ -81,7 +81,7 @@
     if (self.onError) {
         self.onError(@[[NSNull null]]);
     }
-    
+
 }
 
 /**
@@ -90,13 +90,13 @@
  @param adView 广告视图
  */
 - (void)adsy_nativeAdViewRenderOrRegistSuccess:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView{
-    
+
     // 6、注册或渲染成功，此时高度正常，可以展示
     dispatch_async(dispatch_get_main_queue(), ^{
     [[RNNativeADShareInstance shareInstance] initWith:adView];
     [self.emitter nativeViewRenderOrRegistSuccess:[adView bounds].size];
     });
-    
+
 }
 
 /**
@@ -117,26 +117,29 @@
  */
 - (void)adsy_nativeAdClicked:(ADSuyiSDKNativeAd *)nativeAd
                       adView:(__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView{
-    
+
 }
 
 /**
  信息流广告被关闭
- 
+
  @param nativeAd 广告模板
  */
 - (void)adsy_nativeAdClose:(ADSuyiSDKNativeAd *)nativeAd
                     adView:(__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView{
-    
+        dispatch_async(dispatch_get_main_queue(), ^{
+        [self.emitter nativeViewClostButtonClick];
+        });
+
 }
 /**
  信息流广告被展示
- 
+
  @param nativeAd 广告实例
  */
 - (void)adsy_nativeAdExposure:(ADSuyiSDKNativeAd *)nativeAd
                        adView:(__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView{
-    
+
 }
 
 
@@ -149,18 +152,18 @@
     CGFloat adWidth = [self getRootVC].view.frame.size.width;
     CGFloat adHeight = (adWidth - 17 * 2) / 16.0 * 9 + 67 + 38;
     adView.frame = CGRectMake(0, 0, adWidth, adHeight);
-    
+
     // 展示关闭按钮（必要）
     UIButton *closeButton = [UIButton new];
     [adView addSubview:closeButton];
     closeButton.frame = CGRectMake(adWidth - 44, 0, 44, 44);
     [closeButton setBackgroundColor:[UIColor colorWithRed:69 green:69 blue:69 alpha:0.7]];
     [closeButton setTitle:@"去除广告" forState:UIControlStateNormal];
-    
+
 //    [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
     // adsy_close该方法为协议中方法 直接添加target即可 无需实现
 //    [closeButton addTarget:adView action:@selector(adsy_close) forControlEvents:UIControlEventTouchUpInside];
-    
+
     // 显示logo图片（必要）
     if(![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) { // 优量汇（广点通）会自带logo，不需要添加
         UIImageView *logoImage = [UIImageView new];
@@ -172,7 +175,7 @@
             logoImage.image = image;
         }];
     }
-    
+
     // 设置标题文字（可选，但强烈建议带上）
     UILabel *titlabel = [UILabel new];
     [adView addSubview:titlabel];
@@ -182,9 +185,9 @@
     titlabel.text = adView.data.title;
     CGSize textSize = [titlabel sizeThatFits:CGSizeMake(adWidth - 17 * 2, 999)];
     titlabel.frame = CGRectMake(17, 16, adWidth - 17 * 2, textSize.height);
-    
+
     CGFloat height = textSize.height + 16 + 15;
-    
+
     // 设置主图/视频（主图可选，但强烈建议带上,如果有视频试图，则必须带上）
     CGRect mainFrame = CGRectMake(17, height, adWidth - 17 * 2, (adWidth - 17 * 2) / 16.0 * 9);
     if(adView.data.shouldShowMediaView) {
@@ -206,7 +209,7 @@
             });
         }
     }
-    
+
     // 设置广告标识（可选）
     height += (adWidth - 17 * 2) / 16.0 * 9 + 9;
     UILabel *adLabel = [[UILabel alloc]init];
@@ -217,7 +220,7 @@
     [adView addSubview:adLabel];
     adLabel.frame = CGRectMake(17, height, 36, 18);
     adLabel.textAlignment = NSTextAlignmentCenter;
-    
+
     // 设置广告描述(可选)
     UILabel *descLabel = [UILabel new];
     descLabel.textColor = [UIColor adsy_colorWithHexString:@"#333333"];
@@ -234,7 +237,7 @@
     CGFloat adWidth = [self getRootVC].view.frame.size.width;
     CGFloat adHeight = adWidth / 16.0 * 9;
     adView.frame = CGRectMake(0, 0, adWidth, adHeight);
-    
+
     // 设置主图/视频（主图可选，但强烈建议带上,如果有视频试图，则必须带上）
     CGRect mainFrame = CGRectMake(0, 0, adWidth, adHeight);
     if(adView.data.shouldShowMediaView) {
@@ -256,14 +259,14 @@
             });
         }
     }
-    
+
     // 展示关闭按钮（必要）
     UIButton *closeButton = [UIButton new];
     [adView addSubview:closeButton];
     closeButton.frame = CGRectMake(adWidth - 44, 0, 44, 44);
     [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
     [closeButton addTarget:adView action:@selector(adsy_close) forControlEvents:UIControlEventTouchUpInside];
-    
+
     // 显示logo图片（必要）
     if(![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) { // 优量汇（广点通）会自带logo，不需要添加
         UIImageView *logoImage = [UIImageView new];
@@ -285,7 +288,7 @@
     CGFloat adWidth = [self getRootVC].view.frame.size.width;
     CGFloat adHeight = (adWidth - 17 * 2) / 16.0 * 9 + 70;
     adView.frame = CGRectMake(0, 0, adWidth, adHeight);
-    
+
     // 显示logo图片（必要）
     if(![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) { // 优量汇（广点通）会自带logo，不需要添加
         UIImageView *logoImage = [UIImageView new];
@@ -297,7 +300,7 @@
             logoImage.image = image;
         }];
     }
-    
+
     // 设置主图/视频（主图可选，但强烈建议带上,如果有视频试图，则必须带上）
     CGRect mainFrame = CGRectMake(17, 0, adWidth - 17 * 2, (adWidth - 17 * 2) / 16.0 * 9);
     if(adView.data.shouldShowMediaView) {
@@ -319,7 +322,7 @@
             });
         }
     }
-    
+
     // 设置广告标识（可选）
     UILabel *adLabel = [[UILabel alloc]init];
     adLabel.backgroundColor = [UIColor adsy_colorWithHexString:@"#CCCCCC"];
@@ -329,7 +332,7 @@
     [adView addSubview:adLabel];
     adLabel.frame = CGRectMake(17, (adWidth - 17 * 2) / 16.0 * 9 + 9, 36, 18);
     adLabel.textAlignment = NSTextAlignmentCenter;
-    
+
     // 设置广告描述(可选)
     UILabel *descLabel = [UILabel new];
     descLabel.textColor = [UIColor adsy_colorWithHexString:@"#333333"];
@@ -338,7 +341,7 @@
     descLabel.text = adView.data.desc;
     [adView addSubview:descLabel];
     descLabel.frame = CGRectMake(17 + 36 + 4, (adWidth - 17 * 2) / 16.0 * 9 + 9, [self getRootVC].view.frame.size.width - 57 - 17 - 20, 18);
-    
+
     // 设置标题文字（可选，但强烈建议带上）
     UILabel *titlabel = [UILabel new];
     [adView addSubview:titlabel];
@@ -348,7 +351,7 @@
     titlabel.text = adView.data.title;
     CGSize textSize = [titlabel sizeThatFits:CGSizeMake(adWidth - 17 * 2, 999)];
     titlabel.frame = CGRectMake(17, (adWidth - 17 * 2) / 16.0 * 9 + 30, adWidth - 17 * 2, textSize.height);
-    
+
     // 展示关闭按钮（必要）
     UIButton *closeButton = [UIButton new];
 //    [adView addSubview:closeButton];//隐藏X RN 那边实现去除广告
@@ -359,7 +362,7 @@
 //    [closeButton setImage:[UIImage imageNamed:@"close"] forState:UIControlStateNormal];
     [closeButton setBackgroundColor:[UIColor colorWithRed:69/255 green:69/255 blue:69/255 alpha:0.7]];
     [closeButton setTitle:@"去除广告" forState:UIControlStateNormal];
-    
+
     UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:closeButton.bounds byRoundingCorners:UIRectCornerBottomLeft cornerRadii:CGSizeMake(5.0, 5.0)];
            CAShapeLayer *maskLayer = [CAShapeLayer layer];
            maskLayer.frame = closeButton.bounds;
@@ -369,7 +372,7 @@
 
     // adsy_close方法为协议中方法 直接添加target即可 无需实现
     [closeButton addTarget:self action:@selector(adsy_close) forControlEvents:UIControlEventTouchDown];
-    
+
 }
 
 
