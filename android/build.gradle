@@ -47,7 +47,8 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     // ADSuyiSdk、common和OAID库是必须导入的
-    api 'cn.admobiletop.adsuyi.ad:core:3.7.5.05231' //7.6
+//     api 'cn.admobiletop.adsuyi.ad:core:3.7.5.05231' //7.6
+    api 'cn.admobiletop.adsuyi.ad:core:3.7.7.07141' //9.5
 
     // OAID库是必须导入的，请保持和Demo中版本一致
     implementation project(path: ':libsAdmobile')
