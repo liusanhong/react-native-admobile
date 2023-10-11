@@ -8,6 +8,10 @@ $ npm install react-native-admobile --save
 或
 $ yarn add react-native-admobile
 ```
+### [文档](https://doc.admobile.top/ssp/pages/suyisdkand/)
+
+### Android 配置
+
 ```
 Android:
 设置oaid 
@@ -34,6 +38,37 @@ Android:
 // 如果导入后有冲突可以不添加，suyi中已经添加过了
 <uses-sdk tools:overrideLibrary="com.bun.miitmdid"/>
 
+```
+
+
+
+```
+allprojects {
+    repositories {
+        ...
+        google()
+        jcenter()
+        mavenCentral()
+        // 添加ADSuyi相关仓库依赖
+        maven { url "https://maven.admobile.top/repository/maven-releases/" }
+        // 如果添加了汇量广告，需要添加汇量的远程仓库依赖
+        maven { url "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea" }
+        // 如果添加了华为联盟广告，需要添加华为联盟的远程仓库依赖
+        maven { url 'https://developer.huawei.com/repo/' }
+        // 如果添加了gromore广告，需要添加gromore的远程仓库依赖
+        maven { url "https://artifact.bytedance.com/repository/pangle" }
+    }
+}
+```
+
+#### 注意事项
+```
+支持主流架构，x86架构暂不支持
+
+ndk {
+	// 设置支持的SO库架构，暂不支持x86
+	abiFilters 'armeabi-v7a', 'arm64-v8a'
+}
 ```
 
 ```
