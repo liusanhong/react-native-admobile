@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
 
   s.dependency "React"
   # ...
-  s.dependency "ADSuyiSDK",'~> 3.7.5.05232'
+  s.dependency "ADSuyiSDK",'~> 3.7.8.08141'
   s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/tianmu"
   s.dependency 'ADSuyiSDK/ADSuyiSDKPlatforms/bu' # 穿山甲(头条)
   s.dependency 'ADSuyiSDK/ADSuyiSDKPlatforms/gdt' # 优量汇(广点通）
