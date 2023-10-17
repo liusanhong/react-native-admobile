@@ -84,6 +84,9 @@ public class RNBannerView extends LinearLayout {
             Log.d(TAG, "loadBannerAd: 属性还不完整 _codeId=" + _codeId);
             return;
         }
+        if(suyiBannerAd!=null){
+            suyiBannerAd.release();
+        }
 
         // 创建Banner广告实例，第一个参数可以是Activity或Fragment，第二个参数是广告容器（请保证容器不会拦截点击、触摸等事件）
         suyiBannerAd = new ADSuyiBannerAd(reactContext.getCurrentActivity(), this);
@@ -110,14 +113,18 @@ public class RNBannerView extends LinearLayout {
             @Override
             public void onAdClick(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
-                if(instance!=null){
-                    instance.destroyDrawingCache();
+                if(suyiBannerAd!=null){
+//                    instance.destroyDrawingCache();
+                    suyiBannerAd.release();
                 }
             }
 
             @Override
             public void onAdClose(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.d(TAG, "广告关闭回调");
+                if(suyiBannerAd!=null){
+                    suyiBannerAd.release();
+                }
             }
 
             @Override
@@ -128,7 +135,9 @@ public class RNBannerView extends LinearLayout {
                     WritableMap params = Arguments.createMap();
                     params.putString("result", "failed");
                     sendEvent(reactContext, "bannerViewFailAction", params);
-
+                }
+                if(suyiBannerAd!=null){
+                    suyiBannerAd.release();
                 }
             }
         });
@@ -142,4 +151,5 @@ public class RNBannerView extends LinearLayout {
     private boolean isInterceptScroll() {
         return true;
     }
+
 }
