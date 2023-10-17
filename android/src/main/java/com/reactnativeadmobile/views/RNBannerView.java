@@ -25,11 +25,14 @@ import cn.admobiletop.adsuyi.ad.listener.ADSuyiBannerAdListener;
  * describe:
  */
 public class RNBannerView extends LinearLayout {
+    private final RNBannerView instance;
     protected ReactContext reactContext;
     protected Context mContext;
     private String _codeId = null;
     private String TAG = "RNBannerView";
     ADSuyiBannerAd suyiBannerAd;
+
+
 
 
     private void sendEvent(ReactContext reactContext,
@@ -59,6 +62,7 @@ public class RNBannerView extends LinearLayout {
         super(context);
         reactContext = context;
         mContext = context;
+        instance = this;
         // 初始化广告渲染组件
         inflate(mContext, R.layout.layout_ad_banner, this);
 //        mContainer = findViewById(R.id.tt_video_layout_hxb);
@@ -106,6 +110,9 @@ public class RNBannerView extends LinearLayout {
             @Override
             public void onAdClick(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                if(instance!=null){
+                    instance.destroyDrawingCache();
+                }
             }
 
             @Override
