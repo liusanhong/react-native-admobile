@@ -115,16 +115,13 @@ public class RNBannerView extends LinearLayout {
                 Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
                 if(suyiBannerAd!=null){
 //                    instance.destroyDrawingCache();
-                    suyiBannerAd.release();
+                    suyiBannerAd.setAutoRefreshInterval(30);
                 }
             }
 
             @Override
             public void onAdClose(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.d(TAG, "广告关闭回调");
-                if(suyiBannerAd!=null){
-                    suyiBannerAd.release();
-                }
             }
 
             @Override
@@ -136,9 +133,10 @@ public class RNBannerView extends LinearLayout {
                     params.putString("result", "failed");
                     sendEvent(reactContext, "bannerViewFailAction", params);
                 }
-                if(suyiBannerAd!=null){
-                    suyiBannerAd.release();
-                }
+//                if(suyiBannerAd!=null){
+////                    instance.destroyDrawingCache();
+//                    suyiBannerAd.setAutoRefreshInterval(0);
+//                }
             }
         });
 
