@@ -25,7 +25,7 @@ public class SplashAdActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.launch_screen);
+        setContentView(R.layout.activity_splash_ad);
         mContext= this;
         mAdId = getIntent().getStringExtra("adId");
 
