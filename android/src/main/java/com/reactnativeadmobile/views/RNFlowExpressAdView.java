@@ -135,8 +135,8 @@ public class RNFlowExpressAdView extends LinearLayout {
                 adSuyiNativeAdInfo = adInfos.get(0);
                int sise =  adInfos.size();
                 TianmuLogUtil.d(TAG, "onAdReceive sise::" + sise);
-
                 showAd();
+
             }
 
             @Override
@@ -214,7 +214,9 @@ public class RNFlowExpressAdView extends LinearLayout {
         // 渲染广告视图, 必须调用, 因为是模板广告, 所以传入ViewGroup和响应点击的控件可能并没有用
         // 务必在最后调用
         nativeExpressAdInfo.render(this);
-
+        WritableMap params = Arguments.createMap();
+        params.putString("result", "success");
+        sendEvent(reactContext, "nativeViewOnAdReceive",params );
     }
 
     private boolean isInterceptScroll() {
