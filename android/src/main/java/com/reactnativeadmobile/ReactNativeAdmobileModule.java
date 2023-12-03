@@ -47,15 +47,15 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
 //    }
 
     @ReactMethod
-    public void initAd(String appID,Promise promise) {
-        if(this.reactContext!= null){
+    public void initAd(String appID, Promise promise) {
+        if (this.reactContext != null) {
             AdCallbackUtils.setCallBack(this);
 
             ReactApplicationContext context = this.reactContext;
             reactContext.runOnUiQueueThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.e("initAd::",appID);
+                    Log.e("initAd::", appID);
                     // 初始化ADSuyi广告SDK
                     ADSuyiSdk.getInstance().init(context, new ADSuyiInitConfig.Builder()
                             // 设置APPID，必须的
@@ -70,7 +70,9 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                             // 是否可读取wifi状态
                             .isCanUseWifiState(true)
                             // 是否可获取定位数据
-                            .isCanUseLocation(true)
+                            .isCanUseLocation(false)
+                            //是否可读取设备列表
+                            .isCanReadInstallList(false)
                             // 是否可获取设备信息
                             .isCanUsePhoneState(true)
                             // 是否过滤第三方平台的问题广告（例如: 已知某个广告平台在某些机型的Banner广告可能存在问题，如果开启过滤，则在该机型将不再去获取该平台的Banner广告）
@@ -81,14 +83,14 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                             .build(), new ADSuyiInitListener() {
                         @Override
                         public void onSuccess() {
-                            Log.e("initAd:","onSuccess");
+                            Log.e("initAd:", "onSuccess");
                             promise.resolve("success");
                         }
 
                         @Override
                         public void onFailed(String s) {
-                            Log.e("initAd: onFailed:",s);
-                            promise.reject("failed",s);
+                            Log.e("initAd: onFailed:", s);
+                            promise.reject("failed", s);
                         }
                     });
                 }
@@ -101,21 +103,21 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
      * 开屏广告
      */
     @ReactMethod
-    public void splashAd(String adId, Callback successCallback,Callback errorCallback) {
-        if(this.reactContext!= null){
+    public void splashAd(String adId, Callback successCallback, Callback errorCallback) {
+        if (this.reactContext != null) {
             this.mSplashError = errorCallback;
             this.mSplashSuccess = successCallback;
 
-            Intent intent = new Intent(this.reactContext,SplashAdActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-            intent.putExtra("adId",adId);
+            Intent intent = new Intent(this.reactContext, SplashAdActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("adId", adId);
             this.reactContext.startActivity(intent);
         }
     }
 
     @ReactMethod
-    public void intertitialAd(String adId, Callback successCallback,Callback errorCallback) {
-        if(this.reactContext!= null){
+    public void intertitialAd(String adId, Callback successCallback, Callback errorCallback) {
+        if (this.reactContext != null) {
             reactContext.runOnUiQueueThread(new Runnable() {
                 @Override
                 public void run() {
@@ -185,26 +187,25 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
      * 激励广告
      */
     @ReactMethod
-    public void rewardVodAd(String adId, Callback successCallback,Callback errorCallback) {
-        if(this.reactContext!= null){
+    public void rewardVodAd(String adId, Callback successCallback, Callback errorCallback) {
+        if (this.reactContext != null) {
             this.mRewordError = errorCallback;
             this.mRewordSuccess = successCallback;
 
-            Intent intent = new Intent(this.reactContext,RewardVodActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-            intent.putExtra("adId",adId);
+            Intent intent = new Intent(this.reactContext, RewardVodActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("adId", adId);
             this.reactContext.startActivity(intent);
         }
     }
 
 
     /**
-     *
      * @param personalizedAdEnabled
      */
     @ReactMethod
     public void setPersonalizedAdEnabled(boolean personalizedAdEnabled) {
-        if(this.reactContext!= null){
+        if (this.reactContext != null) {
             ADSuyiSdk.setPersonalizedAdEnabled(personalizedAdEnabled);
         }
     }
@@ -212,30 +213,30 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
 
     @Override
     public void rewordSuccessCallback() {
-        if(this.mRewordSuccess != null) {
-            Log.e("AdmobileModule","rewordSuccessCallback");
+        if (this.mRewordSuccess != null) {
+            Log.e("AdmobileModule", "rewordSuccessCallback");
             this.mRewordSuccess.invoke("success");
         }
     }
 
     @Override
     public void rewordErrorCallback() {
-        Log.e("AdmobileModule","rewordErrorCallback");
-        if(this.mRewordError != null){
+        Log.e("AdmobileModule", "rewordErrorCallback");
+        if (this.mRewordError != null) {
             this.mRewordError.invoke("error");
         }
     }
 
     @Override
     public void splashSuccessCallback() {
-        if(this.mSplashSuccess != null){
+        if (this.mSplashSuccess != null) {
             this.mSplashSuccess.invoke("success");
         }
     }
 
     @Override
     public void splashErrorCallback() {
-        if(this.mSplashError != null){
+        if (this.mSplashError != null) {
             this.mSplashError.invoke("error");
         }
     }
