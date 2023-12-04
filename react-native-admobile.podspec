@@ -22,9 +22,9 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,c,cc,cpp,m,mm,swift}"
   s.requires_arc = true
-  s.resource_bundles= {
-  'SST'=>['ios/SST/Assets/*']
-  }
+#   s.resource_bundles= {
+#   'SST'=>['ios/SST/Assets/*.{png,jpg,jpeg,storyboard,xib,xcassets}']
+#   }
 
   s.dependency "React"
   # ...

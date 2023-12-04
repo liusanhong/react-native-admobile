@@ -41,7 +41,25 @@
     */
     self.splashAd.tolerateTimeout = 4;
     // 3、设置默认启动图(一般设置启动图的平铺颜色为背景颜色，使得视觉效果更加平滑)
-   self.splashAd.backgroundColor = [UIColor adsy_getColorWithImage:[UIImage imageNamed:@"launch.png"] withNewSize:[UIScreen mainScreen].bounds.size];
+
+    //  NSURL *url = [[NSBundle mainBundle] URLForResource:@"SST" withExtension:@"bundle"];
+    //  NSBundle *bundle = [NSBundle bundleWithURL:url];
+
+
+
+    //  UIImage *image = [UIImage imageNamed:@"lanuch"
+                                inBundle: bundle
+                              compatibleWithTraitCollection:nil];
+                              //使用项目中的图片，主项目需要提供SharedResources.bundle文件
+                              // 由于每个项目开屏图不一样，这里三方库不在提供资源文件，需要自己提供
+       NSURL *url = [[NSBundle mainBundle] URLForResource:@"SharedResources" withExtension:@"bundle"];
+       NSBundle *bundle = [NSBundle bundleWithURL:url];
+
+       UIImage *image = [UIImage imageNamed:@"launch"
+                                   inBundle: bundle
+                                 compatibleWithTraitCollection:nil];
+
+   self.splashAd.backgroundColor = [UIColor adsy_getColorWithImage:image withNewSize:[UIScreen mainScreen].bounds.size];
 //   self.splashAd.backgroundColor =[UIColor whiteColor];
 
 //    // 4、开屏广告机型适配
