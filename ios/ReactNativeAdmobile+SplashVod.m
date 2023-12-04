@@ -48,8 +48,8 @@
 
 
     //  UIImage *image = [UIImage imageNamed:@"lanuch"
-                                inBundle: bundle
-                              compatibleWithTraitCollection:nil];
+          //                         inBundle: bundle
+             //                    compatibleWithTraitCollection:nil];
                               //使用项目中的图片，主项目需要提供SharedResources.bundle文件
                               // 由于每个项目开屏图不一样，这里三方库不在提供资源文件，需要自己提供
        NSURL *url = [[NSBundle mainBundle] URLForResource:@"SharedResources" withExtension:@"bundle"];
