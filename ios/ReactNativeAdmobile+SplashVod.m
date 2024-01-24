@@ -52,7 +52,15 @@
              //                    compatibleWithTraitCollection:nil];
                               //使用项目中的图片，主项目需要提供SharedResources.bundle文件
                               // 由于每个项目开屏图不一样，这里三方库不在提供资源文件，需要自己提供
-       NSURL *url = [[NSBundle mainBundle] URLForResource:@"SharedResources" withExtension:@"bundle"];
+
+    NSURL *url = [[NSURL alloc]init];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        url = [[NSBundle mainBundle] URLForResource:@"SharedResources_pad" withExtension:@"bundle"];
+    } else {
+        url = [[NSBundle mainBundle] URLForResource:@"SharedResources" withExtension:@"bundle"];
+    }
+
+
        NSBundle *bundle = [NSBundle bundleWithURL:url];
 
        UIImage *image = [UIImage imageNamed:@"launch"
