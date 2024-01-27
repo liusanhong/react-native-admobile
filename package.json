@@ -1,7 +1,7 @@
 {
   "name": "react-native-admobile",
   "title": "React Native Admobile",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "react-native-admobile",
   "main": "index.js",
   "files": [
@@ -19,7 +19,8 @@
     "release:feat": "standard-version --release-as minor",
     "release:feat_beta": "standard-version --release-as minor -p beta",
     "release:fix": "standard-version --release-as patch",
-    "release:fix_beta": "standard-version --release-as patch -p beta"
+    "release:fix_beta": "standard-version --release-as patch -p beta",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",

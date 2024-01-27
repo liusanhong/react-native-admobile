@@ -1,7 +1,10 @@
+"use strict";
 // main index.js
-import { NativeModules } from 'react-native';
-const { ReactNativeAdmobile } = NativeModules;
-export var ReactNativeAdmobileUtils;
+exports.__esModule = true;
+exports.ReactNativeAdmobileUtils = void 0;
+var react_native_1 = require("react-native");
+var ReactNativeAdmobile = react_native_1.NativeModules.ReactNativeAdmobile;
+var ReactNativeAdmobileUtils;
 (function (ReactNativeAdmobileUtils) {
     function initAd(appid) {
         return ReactNativeAdmobile.initAd(appid);
@@ -37,9 +40,10 @@ export var ReactNativeAdmobileUtils;
         ReactNativeAdmobile.intertitialAd(adId, onSuccess, onError);
     }
     ReactNativeAdmobileUtils.intertitialAd = intertitialAd;
-    function setPersonalizedAdEnabled(personalizedAdEnabled = false) {
+    function setPersonalizedAdEnabled(personalizedAdEnabled) {
+        if (personalizedAdEnabled === void 0) { personalizedAdEnabled = false; }
         ReactNativeAdmobile.setPersonalizedAdEnabled(personalizedAdEnabled);
     }
     ReactNativeAdmobileUtils.setPersonalizedAdEnabled = setPersonalizedAdEnabled;
-})(ReactNativeAdmobileUtils || (ReactNativeAdmobileUtils = {}));
-export default ReactNativeAdmobileUtils;
+})(ReactNativeAdmobileUtils = exports.ReactNativeAdmobileUtils || (exports.ReactNativeAdmobileUtils = {}));
+exports["default"] = ReactNativeAdmobileUtils;
