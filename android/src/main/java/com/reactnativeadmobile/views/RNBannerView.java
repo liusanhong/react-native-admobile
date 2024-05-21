@@ -122,6 +122,8 @@ public class RNBannerView extends LinearLayout {
             @Override
             public void onAdClose(ADSuyiAdInfo adSuyiAdInfo) {
                 Log.d(TAG, "广告关闭回调");
+                WritableMap params = Arguments.createMap();
+                sendEvent(reactContext, "bannerAdClose", params);
             }
 
             @Override
