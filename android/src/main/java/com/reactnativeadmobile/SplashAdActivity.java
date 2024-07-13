@@ -3,8 +3,11 @@ package com.reactnativeadmobile;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -32,6 +35,9 @@ public class SplashAdActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_ad);
+
+        setPortalOrientation();
+
         mContext= this;
         mAdId = getIntent().getStringExtra("adId");
 
@@ -134,5 +140,13 @@ public class SplashAdActivity extends AppCompatActivity {
             }
         }
         return -1f; // 返回-1表示获取失败
+    }
+
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    private void setPortalOrientation(){
+        if (android.os.Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
     }
 }
