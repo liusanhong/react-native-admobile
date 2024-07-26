@@ -47,7 +47,7 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     // ADSuyiSdk、common和OAID库是必须导入的
-    api 'cn.admobiletop.adsuyi.ad:core:3.9.1.03061' //24.4.13
+    api 'cn.admobiletop.adsuyi.ad:core:3.9.3.04071' //24.7.26
 
 
     // OAID库是必须导入的，请保持和Demo中版本一致
@@ -59,17 +59,17 @@ dependencies {
     // 天目AdapterSdk，必须的
     // 注意需要额外添加SDK加固对应的混淆配置，具体内容见（5.4.3 混淆配置），如已配置加固混淆请忽略此提示
 //    implementation 'cn.admobiletop.adsuyi.ad.adapter:androidx-tianmu_enc:1.3.3.09261'
-    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:2.2.1.03083' //24.5.17
+    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:2.2.3.05231' //24.7.26
 
     // 艾狄墨搏AdapterSdk，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:admobile-alpha:5.0.7.05171'
     // 广点通（优量汇）AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.575.1445.05131'//24.5.17
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.575.1445.05231'//24.7.26
 
     implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
 
     // 百度增强版AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.35.05061'//24.5.17
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.35.05231'//24.7.26
 
     // 头条AdapterSdk，可选的
     implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:6.1.0.4.05151'//24.5.17
