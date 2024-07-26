@@ -66,7 +66,8 @@ dependencies {
     // 广点通（优量汇）AdapterSdk，可选的
     implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.575.1445.05231'//24.7.26
 
-    implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
+//      gromore的依赖
+//     implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
 
     // 百度增强版AdapterSdk，可选的
     implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.35.05231'//24.7.26
