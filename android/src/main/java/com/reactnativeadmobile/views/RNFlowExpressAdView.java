@@ -19,7 +19,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.reactnativeadmobile.R;
 import com.reactnativeadmobile.utils.Utils;
-import com.tianmu.utils.TianmuLogUtil;
 
 import java.util.List;
 
@@ -101,7 +100,7 @@ public class RNFlowExpressAdView extends LinearLayout {
 //        ADSuyiAdSize size = nativeAd.getLocalExtraParams().getAdSize();
         int widthPixels = getResources().getDisplayMetrics().widthPixels;
 //        int heightPixels = getResources().getDisplayMetrics().heightPixels;
-//        TianmuLogUtil.d(TAG, "heightPixels:" + size.getHeight());
+//        Log.d(TAG, "heightPixels:" + size.getHeight());
 
 // 创建额外参数实例
         ADSuyiExtraParams extraParams = new ADSuyiExtraParams.Builder()
@@ -122,7 +121,7 @@ public class RNFlowExpressAdView extends LinearLayout {
             @Override
             public void onRenderFailed(ADSuyiNativeAdInfo adInfo, ADSuyiError error) {
                 // 广告渲染失败，可在此回调中移除视图和释放广告对象
-                TianmuLogUtil.d(TAG, "onRenderFailed " + adInfo.toString());
+                Log.d(TAG, "onRenderFailed " + adInfo.toString());
                 WritableMap params = Arguments.createMap();
                 params.putString("result", "failed");
                 sendEvent(reactContext, "RNNativeADFailAction", params);
@@ -131,10 +130,10 @@ public class RNFlowExpressAdView extends LinearLayout {
             @Override
             public void onAdReceive(List<ADSuyiNativeAdInfo> adInfos) {
                 // 广告获取成功回调...
-                TianmuLogUtil.d(TAG, "onAdReceive" + adInfos.toString());
+                Log.d(TAG, "onAdReceive" + adInfos.toString());
                 adSuyiNativeAdInfo = adInfos.get(0);
                int sise =  adInfos.size();
-                TianmuLogUtil.d(TAG, "onAdReceive sise::" + sise);
+                Log.d(TAG, "onAdReceive sise::" + sise);
                 showAd();
 
             }
@@ -142,20 +141,20 @@ public class RNFlowExpressAdView extends LinearLayout {
             @Override
             public void onAdExpose(ADSuyiNativeAdInfo adInfo) {
                 // 广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败
-                TianmuLogUtil.d(TAG, "onAdExpose" + adInfo.toString());
+                Log.d(TAG, "onAdExpose" + adInfo.toString());
             }
 
             @Override
             public void onAdClick(ADSuyiNativeAdInfo adInfo) {
                 // 广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败
-                TianmuLogUtil.d(TAG, "onAdClick" + adInfo.toString());
+                Log.d(TAG, "onAdClick" + adInfo.toString());
 
             }
 
             @Override
             public void onAdClose(ADSuyiNativeAdInfo adInfo) {
                 // 广告关闭回调，可在此回调中移除视图和释放广告对象
-                TianmuLogUtil.d(TAG, "onAdClose" + adInfo.toString());
+                Log.d(TAG, "onAdClose" + adInfo.toString());
                 WritableMap params = Arguments.createMap();
                 params.putString("result", "failed");
                 sendEvent(reactContext, "nativeViewCloseByUser", params);
@@ -164,7 +163,7 @@ public class RNFlowExpressAdView extends LinearLayout {
             @Override
             public void onAdFailed(ADSuyiError error) {
                 // 广告获取失败回调...
-                TianmuLogUtil.d(TAG, "onAdFailed" + error.toString());
+                Log.d(TAG, "onAdFailed" + error.toString());
 
                 WritableMap params = Arguments.createMap();
                 params.putString("result", "failed");
