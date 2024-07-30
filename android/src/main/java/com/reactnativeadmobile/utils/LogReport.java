@@ -1,8 +1,5 @@
 package com.reactnativeadmobile.utils;
 
-import io.sentry.Sentry;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 public class LogReport {
 //    Sentry.captureException(scope -> {
