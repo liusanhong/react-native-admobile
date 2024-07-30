@@ -76,7 +76,7 @@ public class RNFlowExpressAdView extends LinearLayout {
         inflate(mContext, R.layout.layout_ad_banner, this);
 //        mContainer = findViewById(R.id.tt_video_layout_hxb);
 // 这个函数很关键，不然不能触发再次渲染，让 view 在 RN 里渲染成功!!
-        Utils.setupLayoutHack(this);
+//        Utils.setupLayoutHack(this);
     }
 
     public void setCodeId(String codeId) {

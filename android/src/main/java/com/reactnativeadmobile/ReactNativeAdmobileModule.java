@@ -108,10 +108,15 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
             this.mSplashError = errorCallback;
             this.mSplashSuccess = successCallback;
 
-            Intent intent = new Intent(this.reactContext, SplashAdActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("adId", adId);
-            this.reactContext.startActivity(intent);
+            try {
+                Intent intent = new Intent(this.reactContext, SplashAdActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("adId", adId);
+                this.reactContext.startActivity(intent);
+            }catch (Exception e){
+
+            }
+
         }
     }
 
