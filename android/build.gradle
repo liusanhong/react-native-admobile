@@ -62,7 +62,7 @@ dependencies {
     // 艾狄墨搏AdapterSdk，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:admobile-alpha:5.0.7.05171'
     // 广点通（优量汇）AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.591.1461.07301'//24.9.18
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.591.1461.07302'//24.9.27
 
 //      gromore的依赖
 //     implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
