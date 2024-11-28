@@ -23,7 +23,7 @@
     while (root.presentedViewController != nil) {
         root = root.presentedViewController;
     }
-    
+
     return root;
 }
 
@@ -36,7 +36,9 @@ RCT_CUSTOM_VIEW_PROPERTY(posId,NSString,RNAdmobileBanner) { //处理自定义属
 
     view.banner.posId = json;
     [view addSubview:view.banner];
-    [view.banner loadAndShowWithError:nil];
+    [view.banner loadAndShow:[self getRootVC]];
+
+    //[view.banner loadAndShowWithError:nil];
 
 }
 
@@ -45,7 +47,7 @@ RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属
     view.banner.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [[NSString stringWithFormat:@"%@",json] floatValue]);
     view.banner.posId = json;
     [view addSubview:view.banner];
-    
+
 
 }
 - (UIView *)view
@@ -54,7 +56,7 @@ RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属
     RNAdmobileBanner *banner  =  [[RNAdmobileBanner alloc] init];
     banner.banner =[[ADSuyiSDKBannerAdView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width,58)];
     banner.banner.delegate = self;
-    banner.banner.controller = [self getRootVC];
+    //banner.banner.controller = [self getRootVC];
     self.emitter = [RNBannerADEmitter allocWithZone: nil];
     return banner;
 }
@@ -64,7 +66,7 @@ RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属
 #pragma mark - ADSuyiSDKBannerAdViewDelegate
 /**
  广告获取成功
- 
+
  @param bannerView banner实例
  */
 - (void)adsy_bannerViewDidReceived:(ADSuyiSDKBannerAdView *)bannerView{
@@ -74,7 +76,7 @@ RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属
 
 /**
  广告拉取失败
- 
+
  @param bannerView banner实例
  @param errorModel 错误描述
  */
@@ -82,22 +84,22 @@ RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属
     NSLog(@"adsy_bannerViewFailToReceived:%@, %@",errorModel.errorDescription, errorModel.errorDetailDict);
 //    [_bannerView removeFromSuperview];
 //    _bannerView = nil;
-    
+
     [self.emitter bannerViewFailToReceived];
 }
 
 /**
  广告点击
- 
+
  @param bannerView 广告实例
  */
 - (void)adsy_bannerViewClicked:(ADSuyiSDKBannerAdView *)bannerView{
-    
+
 }
 
 /**
  广告关闭
- 
+
  @param bannerView 广告实例
  */
 - (void)adsy_bannerViewClose:(ADSuyiSDKBannerAdView *)bannerView{
@@ -106,15 +108,15 @@ RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属
 
 /**
  广告展示
- 
+
  @param bannerView 广告实例
  */
 - (void)adsy_bannerViewExposure:(ADSuyiSDKBannerAdView *)bannerView{
-    
+
 }
 
 - (void)adsy_bannerAdCloseLandingPage:(nonnull ADSuyiSDKBannerAdView *)bannerView {
-    
+
 }
 
 
