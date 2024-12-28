@@ -57,24 +57,28 @@ dependencies {
     // 天目AdapterSdk，必须的
     // 注意需要额外添加SDK加固对应的混淆配置，具体内容见（5.4.3 混淆配置），如已配置加固混淆请忽略此提示
 //    implementation 'cn.admobiletop.adsuyi.ad.adapter:androidx-tianmu_enc:1.3.3.09261'
-    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:2.2.6.08191' //24.11.27
+    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:2.2.9.12101' //24.12.27
 
     // 艾狄墨搏AdapterSdk，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:admobile-alpha:5.0.7.05171'
     // 广点通（优量汇）AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.603.1473.10141'//24.11.27
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.610.1480.12191'//24.12.27
 
 //      gromore的依赖
 //     implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
 
     // 百度增强版AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.07302'//24.11.27
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.10091'//24.12.27
 
     // 头条AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:6.5.0.2.11251'//24.11.27
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:6.5.0.2.12021'//24.12.28
 
     // 快手适配器，可选的
     implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:3.3.69.10091' //24.12.27
+
+     // 华为适配器，可选的
+     implementation 'cn.admobiletop.adsuyi.ad.adapter:hwpps:13.4.75.300.12091' //24.12.28
+
 
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'com.google.android.material:material:1.4.0'
