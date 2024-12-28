@@ -63,6 +63,7 @@ public class RNBannerView extends LinearLayout {
         reactContext = context;
         mContext = context;
         instance = this;
+        Log.e(TAG,"进入广告:"+System.currentTimeMillis());
         // 初始化广告渲染组件
         inflate(mContext, R.layout.layout_ad_banner, this);
 //        mContainer = findViewById(R.id.tt_video_layout_hxb);
@@ -99,12 +100,12 @@ public class RNBannerView extends LinearLayout {
         suyiBannerAd.setListener(new ADSuyiBannerAdListener() {
             @Override
             public void onAdReceive(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告获取成功回调... ");
+                Log.d(TAG, "广告获取成功回调... "+System.currentTimeMillis());
             }
 
             @Override
             public void onAdExpose(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败"+System.currentTimeMillis());
                 WritableMap params = Arguments.createMap();
                 params.putString("result", "success");
                 sendEvent(reactContext, "bannerViewDidReceived", params);

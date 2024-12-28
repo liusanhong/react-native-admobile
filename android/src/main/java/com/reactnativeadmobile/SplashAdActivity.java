@@ -35,6 +35,7 @@ public class SplashAdActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_ad);
+        Log.e(TAG,"进入广告:"+System.currentTimeMillis());
 
         setPortalOrientation();
 
@@ -93,12 +94,13 @@ public class SplashAdActivity extends AppCompatActivity {
             }
             @Override
             public void onAdReceive(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.e(TAG, "广告获取成功回调... ");
+//                Log.e(TAG,System.currentTimeMillis()+"");
+                Log.e(TAG, "广告获取成功回调... "+System.currentTimeMillis());
             }
 
             @Override
             public void onAdExpose(ADSuyiAdInfo adSuyiAdInfo) {
-                Log.e(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                Log.e(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败:"+System.currentTimeMillis());
             }
 
             @Override
