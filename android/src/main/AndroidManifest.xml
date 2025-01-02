@@ -5,6 +5,7 @@
     <application>
         <activity
             android:name=".RewardVodActivity"
+            android:launchMode="singleTask"
             android:exported="true" />
         <activity
             android:theme="@style/adSplash"
