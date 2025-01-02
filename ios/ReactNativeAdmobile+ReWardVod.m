@@ -107,14 +107,14 @@
  */
 - (void)adsy_rewardvodAdDidClick:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     // RN成功回调
-    if (self.resolve) {
-        self.resolve(@{@"posId":rewardvodAd.posId});
+    // if (self.resolve) {
+    //     self.resolve(@{@"posId":rewardvodAd.posId});
 
-    }
-    if (self.onSuccess) {
-        self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
+    // }
+    // if (self.onSuccess) {
+    //     self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
 
-    }
+    // }
 }
 /**
  视频广告视频播放完成
