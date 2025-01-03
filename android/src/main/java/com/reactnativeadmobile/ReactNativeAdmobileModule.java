@@ -193,7 +193,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
             this.mRewordSuccess = successCallback;
 
             Intent intent = new Intent(this.reactContext, RewardVodActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra("adId", adId);
             this.reactContext.startActivity(intent);
         }
