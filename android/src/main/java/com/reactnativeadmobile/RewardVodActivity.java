@@ -117,8 +117,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onAdClose----->");
                 Log.e(TAG, "广告关闭回调");
-//                TODO 得核实是否需要增加回调用
-                AdCallbackUtils.doRewordSuccessCallback();
+                AdCallbackUtils.doRewordErrorCallback("close");
                 RewardVodActivity.this.finish();
             }
 
@@ -128,7 +127,7 @@ public class RewardVodActivity extends AppCompatActivity {
                     String failedJosn = adSuyiError.toString();
                     Log.e(TAG, "onAdFailed----->" + failedJosn);
                     RewardVodActivity.this.finish();
-                    AdCallbackUtils.doRewordErrorCallback();
+                    AdCallbackUtils.doRewordErrorCallback("fail");
                 }
             }
         });

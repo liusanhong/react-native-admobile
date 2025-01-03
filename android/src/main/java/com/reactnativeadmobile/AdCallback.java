@@ -7,7 +7,7 @@ import com.facebook.react.bridge.Callback;
  */
 public interface AdCallback {
     void rewordSuccessCallback();
-    void rewordErrorCallback();
+    void rewordErrorCallback(String backStr);
     void splashSuccessCallback();
     void splashErrorCallback();
 }

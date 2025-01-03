@@ -220,10 +220,10 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     }
 
     @Override
-    public void rewordErrorCallback() {
+    public void rewordErrorCallback(String backStr) {
         Log.e("AdmobileModule", "rewordErrorCallback");
         if (this.mRewordError != null) {
-            this.mRewordError.invoke("error");
+            this.mRewordError.invoke(backStr);
         }
     }
 
