@@ -98,7 +98,8 @@
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     if (self.onError) {
-          self.onError(@[[NSNull null], @{@"result":@"close"}]);
+        //   self.onError(@[[NSNull null], @{@"result":@"close"}]);
+          self.onError(@[{@"result":@"close"}]);
     }
     // 4、广告内存回收
     self.rewardvodAd = nil;
