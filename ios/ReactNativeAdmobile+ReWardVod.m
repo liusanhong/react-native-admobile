@@ -97,6 +97,13 @@
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
+    // TODO 得核实是否需要增加回调用
+    if (self.resolve) {
+        self.resolve(@{@"posId":rewardvodAd.posId});
+    }
+    if (self.onSuccess) {
+        self.onSuccess(@[[NSNull null], @{@"posId":rewardvodAd.posId}]);
+    }
     // 4、广告内存回收
     self.rewardvodAd = nil;
 }
