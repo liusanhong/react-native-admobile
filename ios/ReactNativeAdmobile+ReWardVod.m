@@ -33,6 +33,9 @@
     self.rewardvodAd.extraInfo = @"这是一个激励验证";
     self.rewardvodAd.rewardName = @"刷豆";
     self.rewardvodAd.rewardAmount = [NSNumber numberWithInt:2];
+    
+//    初始化
+    self.isEffective = NO;
     // 2、加载激励视频广告
     [self.rewardvodAd loadRewardvodAd];
 }
@@ -98,10 +101,15 @@
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     if (self.onError) {
-          self.onError(@[ @{@"result":@"close"}]);
+        if(self.isEffective){
+            //            获取了激励广告
+            self.onError(@[@{@"result":@"rewardGetClose"}]);
+        }else{
+            self.onError(@[@{@"result":@"close"}]);
+        }
+        // 4、广告内存回收
+        self.rewardvodAd = nil;
     }
-    // 4、广告内存回收
-    self.rewardvodAd = nil;
 }
 /**
  视频广告信息点击回调
@@ -135,6 +143,7 @@
  */
 - (void)adsy_rewardvodAdDidRewardEffective:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     NSLog(@"=======>%@", rewardvodAd);
+    self.isEffective = YES;
     // RN成功回调
     if (self.resolve) {
         self.resolve(@{@"posId":rewardvodAd.posId});
@@ -181,7 +190,10 @@
 
 - (void)adsy_rewardvodAdServerDidFailed:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
     if (self.onError) {
-        self.onError(@[[NSNull null]]);
+        
+            self.onError(@[[NSNull null]]);
+        
+        
     }
 
 }

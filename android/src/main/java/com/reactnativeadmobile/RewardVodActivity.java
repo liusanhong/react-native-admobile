@@ -20,6 +20,7 @@ public class RewardVodActivity extends AppCompatActivity {
     ADSuyiRewardVodAd rewardVodAd;
     private ADSuyiRewardVodAdInfo rewardVodAdInfo;
     String mAdId;
+    private boolean isEffective = false;
 
 
     @Override
@@ -97,6 +98,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onReward(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onReward----->");
                 Log.e(TAG, "广告激励发放回调... ");
+                isEffective = true;
                 AdCallbackUtils.doRewordSuccessCallback();
             }
 
@@ -117,7 +119,11 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onAdClose----->");
                 Log.e(TAG, "广告关闭回调");
-                AdCallbackUtils.doRewordErrorCallback("close");
+                if (isEffective) {
+                    AdCallbackUtils.doRewordErrorCallback("rewardGetClose");
+                } else {
+                    AdCallbackUtils.doRewordErrorCallback("close");
+                }
                 RewardVodActivity.this.finish();
             }
 

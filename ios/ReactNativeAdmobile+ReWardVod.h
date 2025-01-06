@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ReactNativeAdmobile (ReWardVod)
 - (void)loadRewardvodAd:(NSString *)posId;
+@property (nonatomic, assign) BOOL isEffective;
 @end
 
 NS_ASSUME_NONNULL_END
