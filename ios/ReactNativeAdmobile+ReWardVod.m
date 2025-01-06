@@ -190,10 +190,7 @@
 
 - (void)adsy_rewardvodAdServerDidFailed:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
     if (self.onError) {
-        
-            self.onError(@[[NSNull null]]);
-        
-        
+        self.onError(@[[NSNull null]]);
     }
 
 }
