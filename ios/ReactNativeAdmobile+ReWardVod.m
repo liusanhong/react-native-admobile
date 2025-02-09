@@ -97,9 +97,9 @@
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-    if (self.onError) {
-          self.onError(@[ @{@"result":@"close"}]);
-    }
+//    if (self.onError) {
+//          self.onError(@[ @{@"result":@"close"}]);
+//    }
     // 4、广告内存回收
     self.rewardvodAd = nil;
 }

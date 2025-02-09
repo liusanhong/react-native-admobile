@@ -117,7 +117,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onAdClose----->");
                 Log.e(TAG, "广告关闭回调");
-                AdCallbackUtils.doRewordErrorCallback("close");
+//                AdCallbackUtils.doRewordErrorCallback("close");
                 RewardVodActivity.this.finish();
             }
 
