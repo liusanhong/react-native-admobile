@@ -45,10 +45,6 @@ RCT_CUSTOM_VIEW_PROPERTY(posId,NSString,RNAdmobileBanner) { //处理自定义属
 
 RCT_CUSTOM_VIEW_PROPERTY(height,CGFloat,RNAdmobileBanner) { //处理自定义属性，
     view.banner.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [[NSString stringWithFormat:@"%@",json] floatValue]);
-    view.banner.posId = json;
-    [view addSubview:view.banner];
-
-
 }
 - (UIView *)view
 {
