@@ -35,12 +35,13 @@
     self.rewardvodAd.rewardAmount = [NSNumber numberWithInt:2];
     // 2、加载激励视频广告
     [self.rewardvodAd loadRewardvodAd];
+    self.isVideoCompleted = NO; // 初始化标志位
+
 }
 
 - (void)showRewardvodAd {
     if ([self.rewardvodAd rewardvodAdIsReady] && self.isReadyToplay) {
         [self.rewardvodAd   showRewardvodAd];
-        self.isVideoCompleted = NO; // 初始化标志位
     }
 }
 
