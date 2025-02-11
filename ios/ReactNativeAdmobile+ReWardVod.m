@@ -98,9 +98,7 @@
  @param rewardvodAd 广告实例
  */
 - (void)adsy_rewardvodAdDidClose:(ADSuyiSDKRewardvodAd *)rewardvodAd{
-//    if (self.onError) {
-//          self.onError(@[ @{@"result":@"close"}]);
-//    }
+    NSLog(@"isVideoCompleted: %@", self.isVideoCompleted ? @"YES" : @"NO");
     // **只有广告未完整播放时，才触发回调**
     if (!self.isVideoCompleted && self.onError) {
         self.onError(@[@{@"result": @"close"}]);
@@ -176,9 +174,9 @@
  @param errorModel 具体错误信息
  */
 - (void)adsy_rewardvodAdPlaying:(ADSuyiSDKRewardvodAd *)rewardvodAd errorModel:(ADSuyiAdapterErrorDefine *)errorModel{
-//    if (self.onError) {
-//        self.onError(@[[NSNull null]]);
-//    }
+    if (self.onError) {
+        self.onError(@[[NSNull null]]);
+    }
 }
 
 - (void)adsy_rewardvodAdServerDidSucceed:(ADSuyiSDKRewardvodAd *)rewardvodAd {
@@ -218,5 +216,16 @@ static char *isReadyToplayKey ="isReadyToplayKey";
     return [objc_getAssociatedObject(self, isReadyToplayKey) boolValue];
 }
 
+
+
+static const void *isVideoCompletedKey = &isVideoCompletedKey;
+
+- (void)setIsVideoCompleted:(BOOL)isVideoCompleted {
+    objc_setAssociatedObject(self, isVideoCompletedKey, @(isVideoCompleted), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)isVideoCompleted {
+    return [objc_getAssociatedObject(self, isVideoCompletedKey) boolValue];
+}
 
 @end
