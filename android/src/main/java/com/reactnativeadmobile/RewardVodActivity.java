@@ -20,6 +20,7 @@ public class RewardVodActivity extends AppCompatActivity {
     ADSuyiRewardVodAd rewardVodAd;
     private ADSuyiRewardVodAdInfo rewardVodAdInfo;
     String mAdId;
+    private boolean isVideoReward = false; // 标志广告是否完整播放
 
 
     @Override
@@ -97,6 +98,7 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onReward(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onReward----->");
                 Log.e(TAG, "广告激励发放回调... ");
+                isVideoReward = true; // 记录广告已完整播放
                 AdCallbackUtils.doRewordSuccessCallback();
             }
 
@@ -117,6 +119,10 @@ public class RewardVodActivity extends AppCompatActivity {
             public void onAdClose(ADSuyiRewardVodAdInfo adSuyiRewardVodAdInfo) {
                 Log.e(TAG, "onAdClose----->");
                 Log.e(TAG, "广告关闭回调");
+                // 只有在完整播放的情况下才回调给 React Native
+                if (!isVideoReward) {
+                    AdCallbackUtils.doRewordErrorCallback("close");
+                }
 //                AdCallbackUtils.doRewordErrorCallback("close");
                 RewardVodActivity.this.finish();
             }

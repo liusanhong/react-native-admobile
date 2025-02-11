@@ -14,7 +14,7 @@
 
 @property (nonatomic, strong)ADSuyiSDKRewardvodAd *rewardvodAd;
 @property(nonatomic ,assign) BOOL isReadyToplay;
-
+@property (nonatomic, assign) BOOL isVideoCompleted; // 添加一个变量，记录广告是否完整播放
 
 @end
 
@@ -40,6 +40,7 @@
 - (void)showRewardvodAd {
     if ([self.rewardvodAd rewardvodAdIsReady] && self.isReadyToplay) {
         [self.rewardvodAd   showRewardvodAd];
+        self.isVideoCompleted = NO; // 初始化标志位
     }
 }
 
@@ -100,6 +101,10 @@
 //    if (self.onError) {
 //          self.onError(@[ @{@"result":@"close"}]);
 //    }
+    // **只有广告未完整播放时，才触发回调**
+    if (!self.isVideoCompleted && self.onError) {
+        self.onError(@[@{@"result": @"close"}]);
+    }
     // 4、广告内存回收
     self.rewardvodAd = nil;
 }
@@ -135,6 +140,7 @@
  */
 - (void)adsy_rewardvodAdDidRewardEffective:(ADSuyiSDKRewardvodAd *)rewardvodAd{
     NSLog(@"=======>%@", rewardvodAd);
+    self.isVideoCompleted = YES; // 记录广告播放完成
     // RN成功回调
     if (self.resolve) {
         self.resolve(@{@"posId":rewardvodAd.posId});
