@@ -68,7 +68,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                             // 是否同意使用oaid
                             .isCanUseOaid(true)
                             // 是否可读取wifi状态
-                            .isCanUseWifiState(true)
+                            .isCanUseWifiState(false)
                             // 是否可获取定位数据
                             .isCanUseLocation(false)
                             //是否可读取设备列表
