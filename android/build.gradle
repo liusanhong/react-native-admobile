@@ -68,13 +68,13 @@ dependencies {
 //     implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
 
     // 百度增强版AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.10091'//24.12.27
+//     implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.10091'//24.12.27
 
     // 头条AdapterSdk，可选的
     implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:6.5.0.2.12021'//24.12.28
 
     // 快手适配器，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:3.3.69.10091' //24.12.27
+//     implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:3.3.69.10091' //24.12.27
 
      // 华为适配器，可选的
      implementation 'cn.admobiletop.adsuyi.ad.adapter:hwpps:13.4.75.300.12091' //24.12.28
