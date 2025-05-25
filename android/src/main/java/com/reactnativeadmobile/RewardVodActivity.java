@@ -121,7 +121,12 @@ public class RewardVodActivity extends AppCompatActivity {
                 Log.e(TAG, "广告关闭回调");
                 // 只有在完整播放的情况下才回调给 React Native
                 if (!isVideoReward) {
-                    AdCallbackUtils.doRewordErrorCallback("close");
+                    try {
+                        AdCallbackUtils.doRewordErrorCallback("close");
+                    }catch (Error e){
+                        Log.e(TAG, e.getMessage()+"") ;
+                    }
+
                 }
 //                AdCallbackUtils.doRewordErrorCallback("close");
                 RewardVodActivity.this.finish();
@@ -133,7 +138,12 @@ public class RewardVodActivity extends AppCompatActivity {
                     String failedJosn = adSuyiError.toString();
                     Log.e(TAG, "onAdFailed----->" + failedJosn);
                     RewardVodActivity.this.finish();
-                    AdCallbackUtils.doRewordErrorCallback("fail");
+
+                    try {
+                        AdCallbackUtils.doRewordErrorCallback("fail");
+                    }catch (Error e){
+                        Log.e(TAG, e.getMessage()+"") ;
+                    }
                 }
             }
         });

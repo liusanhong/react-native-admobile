@@ -127,6 +127,15 @@ public class RNFlowExpressAdView extends LinearLayout {
                 sendEvent(reactContext, "RNNativeADFailAction", params);
             }
 
+            /**
+             * 广告渲染成功回调
+             * @param adSuyiNativeAdInfo
+             */
+            @Override
+            public void onRenderSuccess(ADSuyiNativeAdInfo adSuyiNativeAdInfo) {
+
+            }
+
             @Override
             public void onAdReceive(List<ADSuyiNativeAdInfo> adInfos) {
                 // 广告获取成功回调...
