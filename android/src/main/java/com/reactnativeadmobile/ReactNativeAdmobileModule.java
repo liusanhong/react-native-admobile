@@ -14,6 +14,8 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.reactnativeadmobile.utils.SendEventManager;
 
 import cn.admobiletop.adsuyi.ADSuyiSdk;
 import cn.admobiletop.adsuyi.ad.ADSuyiInterstitialAd;
@@ -254,7 +256,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
 
                             @Override
                             public void onReward(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
-//                                SendEventManager.getInstance().sendAdEvent("onRewarded", rewardVodAdInfo);
+                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewarded", rewardVodAdInfo);
                             }
 
                             @Override
@@ -262,26 +264,28 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                                 mRewardVodAdInfo = rewardVodAdInfo;
                                 // 插屏广告对象一次成功拉取的广告数据只允许展示一次
                                 Log.d(TAG, "广告获取成功回调... ");
-//                                SendEventManager.getInstance().sendAdEvent("onRewardSucced", rewardVodAdInfo);
+                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardSucced", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdExpose(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
-//                                SendEventManager.getInstance().sendAdEvent("onRewardExposed", rewardVodAdInfo);
+                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardExposed", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdClick(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
-//                                SendEventManager.getInstance().sendAdEvent("onRewardClicked", rewardVodAdInfo);
+                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardClicked", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdClose(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 releaseReward();
                                 Log.d(TAG, "广告点击关闭回调");
-//                                SendEventManager.getInstance().sendAdEvent("onRewardClosed", rewardVodAdInfo);
+                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardClosed", rewardVodAdInfo);
+//                                sendEvent("onRewardClosed",  rewardVodAdInfo);
+
                             }
 
                             @Override
@@ -295,7 +299,8 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                                     resultMap.putInt("errorCode", adSuyiError.getCode());
                                     resultMap.putString("errorDescription", adSuyiError.getError());
 
-//                                    SendEventManager.getInstance().sendAdEvent("onRewardFailed", null, resultMap);
+                                    SendEventManager.getInstance(reactContext).sendAdEvent("onRewardFailed", null, resultMap);
+//                                    sendEvent("onRewardFailed",  resultMap);
                                 }
                             }
                         });
