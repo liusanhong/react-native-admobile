@@ -71,13 +71,13 @@ dependencies {
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.10091'//24.12.27
 
     // 头条AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:6.8.1.7.05132'//25.5.24
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:6.8.4.0.05261'//25.5.26
 
     // 快手适配器，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:3.3.69.10091' //24.12.27
 
      // 华为适配器，可选的
-     implementation 'cn.admobiletop.adsuyi.ad.adapter:hwpps:13.4.76.300.01031' //25.5.24
+//      implementation 'cn.admobiletop.adsuyi.ad.adapter:hwpps:13.4.76.300.01031' //25.5.24
 
 
     implementation 'androidx.appcompat:appcompat:1.3.0'

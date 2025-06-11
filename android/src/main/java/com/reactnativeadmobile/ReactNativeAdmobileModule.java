@@ -2,21 +2,28 @@
 
 package com.reactnativeadmobile;
 
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
+
 import android.content.Intent;
 import android.util.Log;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
 
 import cn.admobiletop.adsuyi.ADSuyiSdk;
 import cn.admobiletop.adsuyi.ad.ADSuyiInterstitialAd;
+import cn.admobiletop.adsuyi.ad.ADSuyiRewardVodAd;
 import cn.admobiletop.adsuyi.ad.data.ADSuyiInterstitialAdInfo;
+import cn.admobiletop.adsuyi.ad.data.ADSuyiRewardVodAdInfo;
 import cn.admobiletop.adsuyi.ad.entity.ADSuyiExtraParams;
 import cn.admobiletop.adsuyi.ad.error.ADSuyiError;
 import cn.admobiletop.adsuyi.ad.listener.ADSuyiInterstitialAdListener;
+import cn.admobiletop.adsuyi.ad.listener.ADSuyiRewardVodAdListener;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
 import cn.admobiletop.adsuyi.util.ADSuyiAdUtil;
@@ -29,6 +36,15 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     private Callback mRewordError;
     private Callback mSplashSuccess;
     private Callback mSplashError;
+
+    /**
+     * 激励视频广告
+     */
+    private ADSuyiRewardVodAd mRewardVodAd;
+    /**
+     * 激励视频info对象
+     */
+    private ADSuyiRewardVodAdInfo mRewardVodAdInfo;
 
     public ReactNativeAdmobileModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -74,7 +90,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                             //是否可读取设备列表
                             .isCanReadInstallList(false)
                             // 是否可获取设备信息
-                            .isCanUsePhoneState(true)
+                            .isCanUsePhoneState(false)
                             // 是否过滤第三方平台的问题广告（例如: 已知某个广告平台在某些机型的Banner广告可能存在问题，如果开启过滤，则在该机型将不再去获取该平台的Banner广告）
                             .filterThirdQuestion(true)
                             // 注意：如果使用oaid1.0.26版本，需要在assets中放置密钥，并将密钥传入ADSuyi（suyi内部初始化oaid需要使用）
@@ -196,6 +212,129 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra("adId", adId);
             this.reactContext.startActivity(intent);
+        }
+    }
+
+    /**
+     * 激励广告new
+     */
+    @ReactMethod
+    public void loadRewardAd(String adId) {
+        runOnUiThread(
+                () -> {
+                    if (reactContext != null) {
+                        releaseReward();
+                        mRewardVodAd = new ADSuyiRewardVodAd(reactContext.getCurrentActivity());
+                        // 创建额外参数实例
+                        ADSuyiExtraParams extraParams = new ADSuyiExtraParams.Builder()
+                                // 设置视频类广告是否静音（部分渠道支持）
+                                .setVideoWithMute(true)
+                                .build();
+                        mRewardVodAd.setLocalExtraParams(extraParams);
+//                        mRewardVodAd.setOnlySupportPlatform(Constant.ONLY_SUPPORT_PLATFORM);
+//                        mRewardVodAd.setOnlySupportPlatform(Constant.ONLY_SUPPORT_PLATFORM);
+
+                        // 设置插屏广告监听
+                        mRewardVodAd.setListener(new ADSuyiRewardVodAdListener() {
+
+                            @Override
+                            public void onVideoCache(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+
+                            }
+
+                            @Override
+                            public void onVideoComplete(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+
+                            }
+
+                            @Override
+                            public void onVideoError(ADSuyiRewardVodAdInfo rewardVodAdInfo, ADSuyiError adSuyiError) {
+
+                            }
+
+                            @Override
+                            public void onReward(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+//                                SendEventManager.getInstance().sendAdEvent("onRewarded", rewardVodAdInfo);
+                            }
+
+                            @Override
+                            public void onAdReceive(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+                                mRewardVodAdInfo = rewardVodAdInfo;
+                                // 插屏广告对象一次成功拉取的广告数据只允许展示一次
+                                Log.d(TAG, "广告获取成功回调... ");
+//                                SendEventManager.getInstance().sendAdEvent("onRewardSucced", rewardVodAdInfo);
+                            }
+
+                            @Override
+                            public void onAdExpose(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+                                Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+//                                SendEventManager.getInstance().sendAdEvent("onRewardExposed", rewardVodAdInfo);
+                            }
+
+                            @Override
+                            public void onAdClick(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+                                Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+//                                SendEventManager.getInstance().sendAdEvent("onRewardClicked", rewardVodAdInfo);
+                            }
+
+                            @Override
+                            public void onAdClose(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
+                                releaseReward();
+                                Log.d(TAG, "广告点击关闭回调");
+//                                SendEventManager.getInstance().sendAdEvent("onRewardClosed", rewardVodAdInfo);
+                            }
+
+                            @Override
+                            public void onAdFailed(ADSuyiError adSuyiError) {
+                                releaseReward();
+                                if (adSuyiError != null) {
+                                    String failedJson = adSuyiError.toString();
+                                    Log.d(TAG, "广告获取失败：" + failedJson);
+
+                                    WritableMap resultMap = Arguments.createMap();
+                                    resultMap.putInt("errorCode", adSuyiError.getCode());
+                                    resultMap.putString("errorDescription", adSuyiError.getError());
+
+//                                    SendEventManager.getInstance().sendAdEvent("onRewardFailed", null, resultMap);
+                                }
+                            }
+                        });
+                        mRewardVodAd.loadAd(adId);
+                    }
+                }
+        );
+    }
+
+    @ReactMethod
+    public void showRewardAd() {
+        if (reactContext == null) {
+            WritableMap resultMap = Arguments.createMap();
+            resultMap.putInt("errorCode", -1);
+            resultMap.putString("errorDescription", "mReactContext对象为空");
+//            SendEventManager.getInstance().sendAdEvent("onRewardFailed", null, resultMap);
+            return;
+        }
+
+        if (mRewardVodAdInfo == null) {
+            WritableMap resultMap = Arguments.createMap();
+            resultMap.putInt("errorCode", -1);
+            resultMap.putString("errorDescription", "激励视频广告对象为空");
+//            SendEventManager.getInstance().sendAdEvent("onRewardFailed", null, resultMap);
+            return;
+        }
+
+        mRewardVodAdInfo.showRewardVod(reactContext.getCurrentActivity());
+    }
+
+    public void releaseReward() {
+        if (mRewardVodAd != null) {
+            mRewardVodAd.release();
+            mRewardVodAd = null;
+        }
+
+        if (mRewardVodAdInfo != null) {
+            mRewardVodAdInfo.release();
+            mRewardVodAdInfo = null;
         }
     }
 
