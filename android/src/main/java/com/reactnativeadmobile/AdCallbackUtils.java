@@ -10,19 +10,6 @@ public class AdCallbackUtils {
         mCallBack = callBack;
     }
 
-    public static void doRewordErrorCallback(String backStr){
-//        String info = "这里CallBackUtils即将发送的数据。";
-        if(mCallBack != null){
-            mCallBack.rewordErrorCallback(backStr);
-        }
-    }
-
-    public static void doRewordSuccessCallback(){
-        if(mCallBack != null){
-            mCallBack.rewordSuccessCallback();
-        }
-    }
-
 
     public static void doSplashErrorCallback(){
 //        String info = "这里CallBackUtils即将发送的数据。";

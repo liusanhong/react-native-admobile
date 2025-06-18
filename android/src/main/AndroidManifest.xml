@@ -3,9 +3,9 @@
     package="com.reactnativeadmobile">
 
     <application>
-        <activity
+       <!-- <activity
             android:name=".RewardVodActivity"
-            android:exported="true" />
+            android:exported="true" />-->
         <activity
             android:theme="@style/adSplash"
             android:name=".SplashAdActivity"

@@ -15,7 +15,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.reactnativeadmobile.utils.SendEventManager;
+
+import java.util.Map;
 
 import cn.admobiletop.adsuyi.ADSuyiSdk;
 import cn.admobiletop.adsuyi.ad.ADSuyiInterstitialAd;
@@ -34,8 +35,6 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
 
     private final ReactApplicationContext reactContext;
     private String TAG = "AdmobileModule";
-    private Callback mRewordSuccess;
-    private Callback mRewordError;
     private Callback mSplashSuccess;
     private Callback mSplashError;
 
@@ -202,30 +201,17 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     }
 
     /**
-     * 激励广告
-     */
-    @ReactMethod
-    public void rewardVodAd(String adId, Callback successCallback, Callback errorCallback) {
-        if (this.reactContext != null) {
-            this.mRewordError = errorCallback;
-            this.mRewordSuccess = successCallback;
-
-            Intent intent = new Intent(this.reactContext, RewardVodActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("adId", adId);
-            this.reactContext.startActivity(intent);
-        }
-    }
-
-    /**
      * 激励广告new
      */
     @ReactMethod
     public void loadRewardAd(String adId) {
+        Log.e(TAG, "loadRewardAd----->"+adId);
+
         runOnUiThread(
                 () -> {
                     if (reactContext != null) {
                         releaseReward();
+                        Log.e(TAG, "loadRewardAd----->");
                         mRewardVodAd = new ADSuyiRewardVodAd(reactContext.getCurrentActivity());
                         // 创建额外参数实例
                         ADSuyiExtraParams extraParams = new ADSuyiExtraParams.Builder()
@@ -241,51 +227,53 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
 
                             @Override
                             public void onVideoCache(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
-
+                                Log.e(TAG, "onVideoCache");
                             }
 
                             @Override
                             public void onVideoComplete(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
-
+                                Log.e(TAG, "onVideoComplete");
                             }
 
                             @Override
                             public void onVideoError(ADSuyiRewardVodAdInfo rewardVodAdInfo, ADSuyiError adSuyiError) {
-
+                                Log.e(TAG, "onVideoError");
+                                onSendRewardEvent("onVideoError", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onReward(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
-                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewarded", rewardVodAdInfo);
+                                Log.e(TAG, "广告激励获得成功回调...::::: ");
+                                onSendRewardEvent("onReward", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdReceive(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 mRewardVodAdInfo = rewardVodAdInfo;
-                                // 插屏广告对象一次成功拉取的广告数据只允许展示一次
-                                Log.d(TAG, "广告获取成功回调... ");
-                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardSucced", rewardVodAdInfo);
+                                // 插屏广告对象一次成功拉取的广告 数据只允许展示一次
+                                Log.e(TAG, "广告获取成功回调...::::: ");
+                                showRewardAd();
+                                onSendRewardEvent("onAdReceive", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdExpose(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
-                                Log.d(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
-                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardExposed", rewardVodAdInfo);
+                                Log.e(TAG, "广告展示回调，有展示回调不一定是有效曝光，如网络等情况导致上报失败");
+                                onSendRewardEvent("onRewardExposed", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdClick(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
-                                Log.d(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
-                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardClicked", rewardVodAdInfo);
+                                Log.e(TAG, "广告点击回调，有点击回调不一定是有效点击，如网络等情况导致上报失败");
+                                onSendRewardEvent("onRewardClicked", rewardVodAdInfo);
                             }
 
                             @Override
                             public void onAdClose(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 releaseReward();
-                                Log.d(TAG, "广告点击关闭回调");
-                                SendEventManager.getInstance(reactContext).sendAdEvent("onRewardClosed", rewardVodAdInfo);
+                                Log.e(TAG, "广告点击关闭回调");
+                                onSendRewardEvent("onAdClose", rewardVodAdInfo);
 //                                sendEvent("onRewardClosed",  rewardVodAdInfo);
-
                             }
 
                             @Override
@@ -293,13 +281,13 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                                 releaseReward();
                                 if (adSuyiError != null) {
                                     String failedJson = adSuyiError.toString();
-                                    Log.d(TAG, "广告获取失败：" + failedJson);
+                                    Log.e(TAG, "广告获取失败：" + failedJson);
 
                                     WritableMap resultMap = Arguments.createMap();
                                     resultMap.putInt("errorCode", adSuyiError.getCode());
                                     resultMap.putString("errorDescription", adSuyiError.getError());
 
-                                    SendEventManager.getInstance(reactContext).sendAdEvent("onRewardFailed", null, resultMap);
+                                    onSendRewardEvent("onAdFailed",  resultMap);
 //                                    sendEvent("onRewardFailed",  resultMap);
                                 }
                             }
@@ -354,23 +342,6 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
         }
     }
 
-
-    @Override
-    public void rewordSuccessCallback() {
-        if (this.mRewordSuccess != null) {
-            Log.e("AdmobileModule", "rewordSuccessCallback");
-            this.mRewordSuccess.invoke("success");
-        }
-    }
-
-    @Override
-    public void rewordErrorCallback(String backStr) {
-        Log.e("AdmobileModule", "rewordErrorCallback");
-        if (this.mRewordError != null) {
-            this.mRewordError.invoke(backStr);
-        }
-    }
-
     @Override
     public void splashSuccessCallback() {
         if (this.mSplashSuccess != null) {
@@ -383,5 +354,47 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
         if (this.mSplashError != null) {
             this.mSplashError.invoke("error");
         }
+    }
+
+
+    private WritableMap convertRewardVodAdInfoToMap(ADSuyiRewardVodAdInfo adInfo) {
+        WritableMap map = Arguments.createMap();
+        if (adInfo != null) {
+            // 添加基础信息
+            map.putString("adType", "rewardVod");
+
+            // 添加奖励信息
+            Map<String, Object> rewardMap = adInfo.getRewardMap();
+            if (rewardMap != null) {
+                WritableMap rewardWritableMap = Arguments.createMap();
+                for (Map.Entry<String, Object> entry : rewardMap.entrySet()) {
+                    if (entry.getValue() instanceof String) {
+                        rewardWritableMap.putString(entry.getKey(), (String) entry.getValue());
+                    } else if (entry.getValue() instanceof Integer) {
+                        rewardWritableMap.putInt(entry.getKey(), (Integer) entry.getValue());
+                    } else if (entry.getValue() instanceof Boolean) {
+                        rewardWritableMap.putBoolean(entry.getKey(), (Boolean) entry.getValue());
+                    }
+                    // 可以根据需要添加其他类型
+                }
+                map.putMap("reward", rewardWritableMap);
+            }
+        }
+        return map;
+    }
+
+    private void onSendRewardEvent(String type, ADSuyiRewardVodAdInfo adInfo) {
+        WritableMap params = convertRewardVodAdInfoToMap(adInfo);
+        params.putString("eventType", type);
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("RewardAdEvent", params);
+    }
+    private void onSendRewardEvent(String type, WritableMap map) {
+//        WritableMap params = convertRewardVodAdInfoToMap(adInfo);
+        map.putString("eventType", type);
+        reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("RewardAdEvent", map);
     }
 }

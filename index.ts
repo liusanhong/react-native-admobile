@@ -31,6 +31,13 @@ export namespace ReactNativeAdmobileUtils {
         ReactNativeAdmobile.rewardVodAd(adId, onSuccess, onError);
     }
 
+    export function loadRewardAd(adId: string) {
+        ReactNativeAdmobile.loadRewardAd(adId);
+    }
+    export function showRewardAd() {
+        ReactNativeAdmobile.showRewardAd();
+    }
+
     /**
      * 插屏广告
      * @param adId

@@ -27,6 +27,16 @@ export var ReactNativeAdmobileUtils;
         ReactNativeAdmobile.rewardVodAd(adId, onSuccess, onError);
     }
     ReactNativeAdmobileUtils.rewardVodAd = rewardVodAd;
+
+    function loadRewardAd(adId) {
+        ReactNativeAdmobile.loadRewardAd(adId);
+    }
+    ReactNativeAdmobileUtils.loadRewardAd = loadRewardAd;
+
+    function showRewardAd() {
+        ReactNativeAdmobile.showRewardAd();
+    }
+    ReactNativeAdmobileUtils.showRewardAd = showRewardAd;
     /**
      * 插屏广告
      * @param adId
