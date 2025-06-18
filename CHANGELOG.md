@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/liusanhong/react-native-admobile/compare/v1.0.69...v1.2.0) (2025-06-18)
+
+
+### Features
+
+*  增加成功的关闭类型 ([132bfe8](https://github.com/liusanhong/react-native-admobile/commit/132bfe8dcdd24631e46b7a9b7dc1ef2f4bd67650))
+*  ios 开屏广告底图视频ipad版本 ([0d62af5](https://github.com/liusanhong/react-native-admobile/commit/0d62af56e0d0bb4fe642b826b48a55302b6113f6))
+* 关闭按钮的回调 ([fb42c6a](https://github.com/liusanhong/react-native-admobile/commit/fb42c6a62403fba6c04ddbdd9c4673df3218bd27))
+* 广告升级 ([c7ead56](https://github.com/liusanhong/react-native-admobile/commit/c7ead5606971337fc37de37dd91d9fb4938c5c45))
+* 禁止启动图横屏 ([de52d37](https://github.com/liusanhong/react-native-admobile/commit/de52d370c54a4204a6cef6cf5d197411aec195ae))
+* 头条广告更新 ([ac135fc](https://github.com/liusanhong/react-native-admobile/commit/ac135fcb07c3acdeb1373181f0bd1480aff4e98d))
+* 修改导出 ([45ee573](https://github.com/liusanhong/react-native-admobile/commit/45ee573b6c942dc7af24aaf64c5370a94afc1dce))
+* 增加华为渠道 ([365b850](https://github.com/liusanhong/react-native-admobile/commit/365b850889552ebb30b1efdf3999b82658e4dd6d))
+* 增加时间log ([228b438](https://github.com/liusanhong/react-native-admobile/commit/228b438a3689630db9115a3c23b070f9c1c65f34))
+* add 快手 ([84bb0cd](https://github.com/liusanhong/react-native-admobile/commit/84bb0cdda80d1c9422e0b43f563bd4962f6952b5))
+* ios 开屏图支持图片背景 ([e4e97ef](https://github.com/liusanhong/react-native-admobile/commit/e4e97ef5902ac3d850d912e0c6833560125614ed))
+* ios update version ([e14c42c](https://github.com/liusanhong/react-native-admobile/commit/e14c42c5cd486d55458f955e11a732d4601e4ea2))
+* ios版本升级 ([0014dca](https://github.com/liusanhong/react-native-admobile/commit/0014dca90812f1ededd93672f5146cc682dee385))
+* update toutiao ([414ad22](https://github.com/liusanhong/react-native-admobile/commit/414ad2229e28c2f6ea6b70a2c231e8fd9ed788bc))
+* update version ([622be8d](https://github.com/liusanhong/react-native-admobile/commit/622be8d09f21ae23dbb521c8eff2b0f596e4f5c7))
+* update version ([a0a1501](https://github.com/liusanhong/react-native-admobile/commit/a0a1501551eda2533be3efb729677959cde65620))
+* update version ([270747f](https://github.com/liusanhong/react-native-admobile/commit/270747f090bf10446551bc7526a97e1ea47e48a1))
+* update version ([7e9510b](https://github.com/liusanhong/react-native-admobile/commit/7e9510be335c292013c94b34d74afc43971dca48))
+
+
+### Bug Fixes
+
+*  修改android的启动问题 ([c69579d](https://github.com/liusanhong/react-native-admobile/commit/c69579dd234d9513fc64d3800c473312962fd60c))
+* 广告没有播放完成的关闭回掉 ([acf8f0c](https://github.com/liusanhong/react-native-admobile/commit/acf8f0c554cf70318609e3b187d731724ce7f72b))
+* 删除百度快手库 ([87a6a35](https://github.com/liusanhong/react-native-admobile/commit/87a6a35f4ce644f173d1acfe60caa83284b081ff))
+* 适配新的api ([8f68e70](https://github.com/liusanhong/react-native-admobile/commit/8f68e70fe9439e8d4dc16c217b91608e5ae2560e))
+* 修复重置是否观看完毕的时机。 ([a9b113a](https://github.com/liusanhong/react-native-admobile/commit/a9b113aa4161ff33f6b47980b4652631ecd042a3))
+* 修复ios广告，点击x闪退问题 ([cd2978f](https://github.com/liusanhong/react-native-admobile/commit/cd2978f99dd910ac0dae41e32171b2b0a66791e6))
+* 修改关闭的回掉 ([6eaf323](https://github.com/liusanhong/react-native-admobile/commit/6eaf323677573c318e95e2285fc106c7781b94d6))
+* 修改激励广告的启动模式 ([d3e53f1](https://github.com/liusanhong/react-native-admobile/commit/d3e53f152c75677dad780bc3df75b937e6e612b1))
+* 优化代码 ([6d4c8c1](https://github.com/liusanhong/react-native-admobile/commit/6d4c8c182a5646f1a0295d849aabdcf1b08cac0f))
+* android 增加关闭回掉 ([52fb28c](https://github.com/liusanhong/react-native-admobile/commit/52fb28cbbb998345acfca9a5ed59127ebc7d3703))
+* ios  build bug ([dc8a3ff](https://github.com/liusanhong/react-native-admobile/commit/dc8a3fffde8f1e141af9d81621a13e07f6590cdd))
+* ios close ([395d7fd](https://github.com/liusanhong/react-native-admobile/commit/395d7fd9e73e284f205cbe786c3c32785f01686e))
+* update ([e0fadba](https://github.com/liusanhong/react-native-admobile/commit/e0fadbabf061698daac4c0cc48da2cae8e5e1f98))
+* update ([3d1560e](https://github.com/liusanhong/react-native-admobile/commit/3d1560ef60c049d7a8d2815b2c928abc690dbdc4))
+* update ios ([f1d8c92](https://github.com/liusanhong/react-native-admobile/commit/f1d8c9270389a842d6e54fb08aab993fe78b1737))
+* update version ([a95b650](https://github.com/liusanhong/react-native-admobile/commit/a95b650e773810425eda96ee87dc20468552cfcf))
+* update version ([cd8ebab](https://github.com/liusanhong/react-native-admobile/commit/cd8ebab95a1ec9a5157b01f516d8cffad2411506))
+* update version ([2024b42](https://github.com/liusanhong/react-native-admobile/commit/2024b42964d00ce9b1a01cf119402f9d06b7f307))
+
 ### 1.0.68 (2023-11-11)
 
 
