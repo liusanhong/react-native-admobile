@@ -30,6 +30,10 @@ import cn.admobiletop.adsuyi.ad.listener.ADSuyiRewardVodAdListener;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
 import cn.admobiletop.adsuyi.util.ADSuyiAdUtil;
+import android.app.ProgressDialog;
+import android.view.Gravity;
+import android.widget.ProgressBar;
+
 
 public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implements AdCallback {
 
@@ -37,7 +41,12 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     private String TAG = "AdmobileModule";
     private Callback mSplashSuccess;
     private Callback mSplashError;
+    private Callback mRewordSuccess;
+    private Callback mRewordError;
+    private boolean isVideoReward;
 
+    // 添加广告ID存储字段
+    private String mCurrentRewardAdId;
     /**
      * 激励视频广告
      */
@@ -204,13 +213,21 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
      * 激励广告new
      */
     @ReactMethod
-    public void loadRewardAd(String adId) {
+    public void rewardVodAd(String adId,Callback successCallback, Callback errorCallback) {
         Log.e(TAG, "loadRewardAd----->"+adId);
-
+        this.mRewordError = errorCallback;
+        this.mRewordSuccess = successCallback;
         runOnUiThread(
                 () -> {
                     if (reactContext != null) {
+                        // 创建透明背景的加载弹窗
+                        ProgressDialog loadingDialog = new ProgressDialog(reactContext.getCurrentActivity(), R.style.TransparentProgressDialog);
+                        loadingDialog.setCancelable(false);
+                        loadingDialog.show();
+                        loadingDialog.setContentView(R.layout.custom_progress_dialog);
+
                         releaseReward();
+                        mCurrentRewardAdId = adId; // 保存当前广告ID
                         Log.e(TAG, "loadRewardAd----->");
                         mRewardVodAd = new ADSuyiRewardVodAd(reactContext.getCurrentActivity());
                         // 创建额外参数实例
@@ -238,18 +255,26 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                             @Override
                             public void onVideoError(ADSuyiRewardVodAdInfo rewardVodAdInfo, ADSuyiError adSuyiError) {
                                 Log.e(TAG, "onVideoError");
+                                loadingDialog.dismiss();
                                 onSendRewardEvent("onVideoError", rewardVodAdInfo);
+                                mRewordError.invoke("error");
                             }
 
                             @Override
                             public void onReward(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 Log.e(TAG, "广告激励获得成功回调...::::: ");
                                 onSendRewardEvent("onReward", rewardVodAdInfo);
+                                isVideoReward=true;
+                                if (mRewordSuccess != null) {
+                                    Log.e("AdmobileModule", "rewordSuccessCallback");
+                                    mRewordSuccess.invoke("success");
+                                }
                             }
 
                             @Override
                             public void onAdReceive(ADSuyiRewardVodAdInfo rewardVodAdInfo) {
                                 mRewardVodAdInfo = rewardVodAdInfo;
+                                loadingDialog.dismiss();
                                 // 插屏广告对象一次成功拉取的广告 数据只允许展示一次
                                 Log.e(TAG, "广告获取成功回调...::::: ");
                                 showRewardAd();
@@ -273,6 +298,14 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                                 releaseReward();
                                 Log.e(TAG, "广告点击关闭回调");
                                 onSendRewardEvent("onAdClose", rewardVodAdInfo);
+                                if (!isVideoReward) {
+                                    try {
+                                        mRewordError.invoke("close");
+                                    }catch (Error e){
+                                        Log.e(TAG, e.getMessage()+"") ;
+                                    }
+
+                                }
 //                                sendEvent("onRewardClosed",  rewardVodAdInfo);
                             }
 
@@ -280,6 +313,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                             public void onAdFailed(ADSuyiError adSuyiError) {
                                 releaseReward();
                                 if (adSuyiError != null) {
+                                    loadingDialog.dismiss();
                                     String failedJson = adSuyiError.toString();
                                     Log.e(TAG, "广告获取失败：" + failedJson);
 
@@ -289,6 +323,12 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
 
                                     onSendRewardEvent("onAdFailed",  resultMap);
 //                                    sendEvent("onRewardFailed",  resultMap);
+                                    try {
+                                        mRewordError.invoke("fail");
+                                    }catch (Error e){
+                                        Log.e(TAG, e.getMessage()+"") ;
+                                    }
+
                                 }
                             }
                         });
@@ -386,6 +426,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     private void onSendRewardEvent(String type, ADSuyiRewardVodAdInfo adInfo) {
         WritableMap params = convertRewardVodAdInfoToMap(adInfo);
         params.putString("eventType", type);
+        params.putString("adId", mCurrentRewardAdId);
         reactContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("RewardAdEvent", params);
@@ -393,6 +434,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
     private void onSendRewardEvent(String type, WritableMap map) {
 //        WritableMap params = convertRewardVodAdInfoToMap(adInfo);
         map.putString("eventType", type);
+        map.putString("adId", mCurrentRewardAdId);
         reactContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit("RewardAdEvent", map);
