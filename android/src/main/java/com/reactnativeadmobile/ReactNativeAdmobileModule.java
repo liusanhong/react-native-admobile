@@ -4,8 +4,13 @@ package com.reactnativeadmobile;
 
 import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -30,9 +35,6 @@ import cn.admobiletop.adsuyi.ad.listener.ADSuyiRewardVodAdListener;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
 import cn.admobiletop.adsuyi.util.ADSuyiAdUtil;
-import android.app.ProgressDialog;
-import android.view.Gravity;
-import android.widget.ProgressBar;
 
 
 public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implements AdCallback {
@@ -220,11 +222,16 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
         runOnUiThread(
                 () -> {
                     if (reactContext != null) {
-                        // 创建透明背景的加载弹窗
-                        ProgressDialog loadingDialog = new ProgressDialog(reactContext.getCurrentActivity(), R.style.TransparentProgressDialog);
+
+                        // 创建自定义加载对话框
+                        AlertDialog.Builder builder = new AlertDialog.Builder(reactContext.getCurrentActivity());
+                        ProgressBar progressBar = new ProgressBar(reactContext.getCurrentActivity());
+                        builder.setView(progressBar);
+                        AlertDialog loadingDialog = builder.create();
+                        loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
                         loadingDialog.setCancelable(false);
                         loadingDialog.show();
-                        loadingDialog.setContentView(R.layout.custom_progress_dialog);
 
                         releaseReward();
                         mCurrentRewardAdId = adId; // 保存当前广告ID
