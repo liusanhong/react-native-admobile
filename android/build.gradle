@@ -71,7 +71,7 @@ dependencies {
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.10091'//24.12.27
 
     // 头条AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:7.0.0.8.0715'//25.7.24
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:7.0.0.8.07151'//25.7.24
 
     // 快手适配器，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:3.3.69.10091' //24.12.27
