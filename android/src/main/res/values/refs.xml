@@ -6,4 +6,7 @@
     <item type="drawable" name="launch_screen">
         @drawable/launch_screen
     </item>
+    <item type="drawable" name="launch_screen_bottom">
+        @drawable/launch_screen_bottom
+    </item>
 </resources>
