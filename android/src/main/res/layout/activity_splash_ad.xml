@@ -17,7 +17,7 @@
         android:scaleType="fitXY"
         android:src="@drawable/launch_screen_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHeight_percent="0.25" />
+        app:layout_constraintHeight_percent="0.20" />
 
 
 
