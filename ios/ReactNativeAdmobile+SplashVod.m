@@ -86,6 +86,27 @@
 //    logoImageView.frame = CGRectMake(([UIScreen mainScreen].bounds.size.width-135)/2, (bottomViewHeight-46)/2, 135, 46);
 //    [bottomView addSubview:logoImageView];
 
+
+    UIImageView *bottomView = [[UIImageView alloc] init];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
+        bottomView.frame = CGRectMake(0,  [UIScreen mainScreen].bounds.size.height-190, [UIScreen mainScreen].bounds.size.width, 190);
+        bottomView.image = [UIImage imageNamed:@"ipadbottomlaunch"
+                                      inBundle: bundle
+                 compatibleWithTraitCollection:nil];
+    }
+    else{
+
+        bottomView.frame = CGRectMake(0,  [UIScreen mainScreen].bounds.size.height-162, [UIScreen mainScreen].bounds.size.width, 162);
+        bottomView.image = [UIImage imageNamed:@"iphonebottomlaunch"
+                                      inBundle: bundle
+                 compatibleWithTraitCollection:nil];
+
+    }
+//    [self.splashAd.controller.view addSubview:bottomView];
+//    UIImageView *logoImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"ADMob_Logo.png"]];
+//    logoImageView.frame = CGRectMake(([UIScreen mainScreen].bounds.size.width-135)/2, (bottomViewHeight-46)/2, 135, 46);
+//    [bottomView addSubview:logoImageView];
+
     // 6、设置开屏保底逻辑（可选）
     /**
      *功能说明：App在首次启动时，需要先请求获取广告位配置文件后，然后再去请求开屏广告，也就是首次加载开屏广告时需要两次串行网络请求，因此很容易因超时导致开屏广告展示失败。
@@ -95,7 +116,7 @@
      */
 //    [self.splashAd setBottomSplashWithSuyiPosid:@"5df7ae050f7ab37e75" platformListId:@"3827" platform:@"ksad" appId:@"90010" appKey:nil platformPosid:@"4000000041" renderType:ADSuyiSplashRenderTypeExpressPro];
     // 7、加载开屏广告
-    [self.splashAd loadAndShowInWindow:[[[UIApplication sharedApplication] delegate] window]];
+    [self.splashAd loadAndShowInWindow:[[[UIApplication sharedApplication] delegate] window]withBottomView:bottomView];
 }
 
 
