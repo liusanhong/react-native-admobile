@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,9 +59,13 @@ public class SplashAdActivity extends AppCompatActivity {
         // 屏幕高度px
         float heightPixels = getResources().getDisplayMetrics().heightPixels;
 
-
+        // 设置沉浸式状态栏
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
         // 沉浸式显示
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | // 启用沉浸模式，避免系统栏意外出现
@@ -87,13 +92,23 @@ public class SplashAdActivity extends AppCompatActivity {
             heightPixels = heightPixels * (density / originalDensity);
         }
 
-        // 将162dp转换为px
-        int bottomImageHeightPx = (int) (162 * density + 0.5f);
-
+        // 动态获取底部图片高度
+        int bottomImageHeightPx = getBottomImageHeightPx();
+        
+        // 动态调整图片高度，消除广告和底部图之间的空隙
+        // 根据经验值，通常需要减去2-3像素来完全消除空隙
+        int adjustedBottomImageHeightPx = Math.max(0, bottomImageHeightPx - 3);
+        
+        Log.d(TAG, "原始图片高度: " + bottomImageHeightPx + "px");
+        Log.d(TAG, "调整后图片高度: " + adjustedBottomImageHeightPx + "px");
+        Log.d(TAG, "广告高度: " + (heightPixels - adjustedBottomImageHeightPx) + "px");
+        Log.d(TAG, "屏幕总高度: " + heightPixels + "px");
+        Log.d(TAG, "调整像素数: " + (bottomImageHeightPx - adjustedBottomImageHeightPx) + "px");
+        
         // 创建额外参数实例
         ADSuyiExtraParams extraParams = new ADSuyiExtraParams.Builder()
                 // 设置整个广告视图预期宽高(目前仅头条平台需要，没有接入头条可不设置)，单位为px，如果不设置头条开屏广告视图将会以9 : 16的比例进行填充，小屏幕手机可能会出现素材被压缩的情况
-                .adSize(new ADSuyiAdSize((int)widthPixels, (int)heightPixels-bottomImageHeightPx))
+                .adSize(new ADSuyiAdSize((int)widthPixels, (int)heightPixels-adjustedBottomImageHeightPx))
                 .build();
         // 如果开屏容器不是全屏可以设置额外参数
         adSuyiSplashAd.setLocalExtraParams(extraParams);
@@ -154,6 +169,40 @@ public class SplashAdActivity extends AppCompatActivity {
         });
 
         adSuyiSplashAd.loadAd(mAdId);
+        
+        // 延迟检查布局，确保没有空隙
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkAndFixGap();
+            }
+        }, 100); // 100ms后检查
+    }
+    
+    /**
+     * 检查并修复广告和底部图之间的空隙
+     */
+    private void checkAndFixGap() {
+        try {
+            View splashContainer = findViewById(R.id.splash_container);
+            View bottomImage = findViewById(R.id.bottom_image);
+            
+            if (splashContainer != null && bottomImage != null) {
+                int containerBottom = splashContainer.getBottom();
+                int imageTop = bottomImage.getTop();
+                int gap = imageTop - containerBottom;
+                
+                Log.d(TAG, "容器底部位置: " + containerBottom + "px");
+                Log.d(TAG, "图片顶部位置: " + imageTop + "px");
+                Log.d(TAG, "检测到空隙: " + gap + "px");
+                
+                if (gap > 0) {
+                    Log.w(TAG, "发现空隙，需要进一步调整布局");
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "检查空隙失败: " + e.getMessage());
+        }
     }
 
     public static float getRealScreenDensity(Context context) {
@@ -170,6 +219,50 @@ public class SplashAdActivity extends AppCompatActivity {
             }
         }
         return -1f; // 返回-1表示获取失败
+    }
+
+    /**
+     * 获取底部图片的实际高度（像素）
+     * @return 底部图片高度（像素）
+     */
+    private int getBottomImageHeightPx() {
+        try {
+            // 获取屏幕密度
+            final float density = getResources().getDisplayMetrics().density;
+            
+            // 获取屏幕宽度
+            int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            
+            // 加载图片资源
+            android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
+            options.inJustDecodeBounds = true; // 只获取图片尺寸，不加载图片内容
+            
+            // 从drawable资源加载图片信息
+            android.graphics.BitmapFactory.decodeResource(getResources(), R.drawable.launch_screen_bottom, options);
+            
+            if (options.outWidth > 0 && options.outHeight > 0) {
+                // 计算图片在屏幕上的实际显示高度
+                float imageAspectRatio = (float) options.outHeight / options.outWidth;
+                float exactHeight = screenWidth * imageAspectRatio;
+                int actualHeight = Math.round(exactHeight); // 使用四舍五入避免截断误差
+                
+                Log.d(TAG, "图片原始尺寸: " + options.outWidth + "x" + options.outHeight);
+                Log.d(TAG, "屏幕宽度: " + screenWidth + "px");
+                Log.d(TAG, "精确计算高度: " + exactHeight + "px");
+                Log.d(TAG, "四舍五入后高度: " + actualHeight + "px");
+                
+                return actualHeight;
+            } else {
+                // 如果获取图片尺寸失败，使用默认值
+                Log.w(TAG, "无法获取图片尺寸，使用默认高度: " + (162 * density) + "px");
+                return (int) (162 * density);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "获取图片高度失败: " + e.getMessage());
+            // 发生异常时使用默认值
+            final float density = getResources().getDisplayMetrics().density;
+            return (int) (162 * density);
+        }
     }
 
 
