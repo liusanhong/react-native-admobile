@@ -104,7 +104,7 @@ public class SplashAdActivity extends AppCompatActivity {
 
 
         // 计算广告高度：屏幕高度 - 底部图片高度 + 状态栏高度
-        int adHeight = (int) heightPixels - bottomImageHeightPx + statusBarHeight + 10;
+        int adHeight = (int) heightPixels - bottomImageHeightPx + statusBarHeight + 20;
 
         Log.e(TAG, "原始图片高度: " + bottomImageHeightPx + "px");
 //        Log.e(TAG, "调整后图片高度: " + adjustedBottomImageHeightPx + "px");
@@ -179,21 +179,13 @@ public class SplashAdActivity extends AppCompatActivity {
 
         adSuyiSplashAd.loadAd(mAdId);
 
-        // 延迟检查布局，确保没有空隙
-//        new android.os.Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                checkAndFixGap();
-//            }
-//        }, 200); // 200ms后检查，给更多时间让布局完成
-
-        // 再次检查，确保空隙完全消除
-//        new android.os.Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                checkAndFixGap();
-//            }
-//        }, 500); // 500ms后再次检查
+        // 延迟设置图片高度，确保图片填充满
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setBottomImageHeight();
+            }
+        }, 100); // 100ms后设置图片高度
     }
 
     public static float getRealScreenDensity(Context context) {
@@ -248,9 +240,6 @@ public class SplashAdActivity extends AppCompatActivity {
             // 获取屏幕密度
             final float density = getResources().getDisplayMetrics().density;
 
-            // 获取屏幕宽度
-//            int screenWidth = getResources().getDisplayMetrics().widthPixels;
-
             // 加载图片资源
             android.graphics.BitmapFactory.Options options = new android.graphics.BitmapFactory.Options();
             options.inJustDecodeBounds = true; // 只获取图片尺寸，不加载图片内容
@@ -269,37 +258,61 @@ public class SplashAdActivity extends AppCompatActivity {
                 Log.d(TAG, "图片原始尺寸: " + options.outWidth + "x" + options.outHeight);
                 Log.d(TAG, "屏幕宽度: " + screenWidth + "px");
                 Log.d(TAG, "屏幕密度: " + density);
+                Log.d(TAG, "图片宽高比: " + imageAspectRatio);
                 Log.d(TAG, "精确计算高度: " + exactHeight + "px");
                 Log.d(TAG, "四舍五入后高度: " + actualHeight + "px");
 
                 return actualHeight;
             } else {
-                // 如果获取图片尺寸失败，尝试使用TypedValue获取
-                Log.w(TAG, "BitmapFactory无法获取图片尺寸，尝试使用TypedValue");
-                try {
-                    android.util.TypedValue typedValue = new android.util.TypedValue();
-                    getResources().getValue(R.drawable.launch_screen_bottom, typedValue, true);
+                // 如果获取图片尺寸失败，使用默认宽高比
+                Log.w(TAG, "BitmapFactory无法获取图片尺寸，使用默认宽高比");
+                
+                // 根据屏幕密度计算实际高度
+                // 假设图片是基于mdpi设计的，高度约为屏幕宽度的0.376倍（282/750）
+                float defaultAspectRatio = 282f / 750f; // 基于常见设计比例
+                int calculatedHeight = Math.round(screenWidth * defaultAspectRatio);
 
-                    // 根据屏幕密度计算实际高度
-                    // 假设图片是基于mdpi设计的，高度约为屏幕宽度的0.376倍（282/750）
-                    float defaultAspectRatio = 282f / 750f; // 基于常见设计比例
-                    int calculatedHeight = Math.round(screenWidth * defaultAspectRatio);
-
-                    Log.d(TAG, "使用默认宽高比计算高度: " + calculatedHeight + "px");
-                    return calculatedHeight;
-                } catch (Exception e2) {
-                    Log.w(TAG, "TypedValue也失败，使用固定默认高度: " + (162 * density) + "px");
-                    return (int) (162 * density);
-                }
+                Log.d(TAG, "使用默认宽高比计算高度: " + calculatedHeight + "px");
+                Log.d(TAG, "默认宽高比: " + defaultAspectRatio);
+                return calculatedHeight;
             }
         } catch (Exception e) {
             Log.e(TAG, "获取图片高度失败: " + e.getMessage());
             // 发生异常时使用默认值
             final float density = getResources().getDisplayMetrics().density;
-            return (int) (162 * density);
+            int fallbackHeight = (int) (162 * density);
+            Log.w(TAG, "使用fallback高度: " + fallbackHeight + "px");
+            return fallbackHeight;
         }
     }
 
+    /**
+     * 设置底部图片高度，确保图片填充满
+     */
+    private void setBottomImageHeight() {
+        try {
+            View bottomImage = findViewById(R.id.bottom_image);
+            if (bottomImage != null) {
+                // 获取屏幕宽度
+                int screenWidth = getResources().getDisplayMetrics().widthPixels;
+                
+                // 计算图片应该的高度
+                int calculatedHeight = getBottomImageHeightPx(screenWidth);
+                
+                // 设置图片的布局参数
+                android.view.ViewGroup.LayoutParams layoutParams = bottomImage.getLayoutParams();
+                if (layoutParams != null) {
+                    layoutParams.height = calculatedHeight;
+                    bottomImage.setLayoutParams(layoutParams);
+                    
+                    Log.d(TAG, "已设置底部图片高度: " + calculatedHeight + "px");
+                    Log.d(TAG, "屏幕宽度: " + screenWidth + "px");
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "设置底部图片高度失败: " + e.getMessage());
+        }
+    }
 
     @SuppressLint("SourceLockedOrientationActivity")
     private void setPortalOrientation() {
