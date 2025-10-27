@@ -32,6 +32,7 @@ import cn.admobiletop.adsuyi.ad.entity.ADSuyiExtraParams;
 import cn.admobiletop.adsuyi.ad.error.ADSuyiError;
 import cn.admobiletop.adsuyi.ad.listener.ADSuyiInterstitialAdListener;
 import cn.admobiletop.adsuyi.ad.listener.ADSuyiRewardVodAdListener;
+import cn.admobiletop.adsuyi.adapter.toutiao.TTSYInitManager;
 import cn.admobiletop.adsuyi.config.ADSuyiInitConfig;
 import cn.admobiletop.adsuyi.listener.ADSuyiInitListener;
 import cn.admobiletop.adsuyi.util.ADSuyiAdUtil;
@@ -85,6 +86,7 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                 public void run() {
                     Log.e("initAd::", appID);
                     // 初始化ADSuyi广告SDK
+                    TTSYInitManager.getInstance().setSkipInitCount(3);
                     ADSuyiSdk.getInstance().init(context, new ADSuyiInitConfig.Builder()
                             // 设置APPID，必须的
                             .appId(appID)
