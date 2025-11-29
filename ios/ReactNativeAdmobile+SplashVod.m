@@ -87,21 +87,22 @@
 //    [bottomView addSubview:logoImageView];
 
 
-    UIImageView *bottomView = [[UIImageView alloc] init];
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        bottomView.frame = CGRectMake(0,  [UIScreen mainScreen].bounds.size.height-190, [UIScreen mainScreen].bounds.size.width, 190);
-        bottomView.image = [UIImage imageNamed:@"ipadbottomlaunch"
-                                      inBundle: bundle
-                 compatibleWithTraitCollection:nil];
-    }
-    else{
+      UIImageView *bottomView = [[UIImageView alloc] init];
+          UIImage *bottomImage = nil;
+          CGFloat height = 0;
 
-        bottomView.frame = CGRectMake(0,  [UIScreen mainScreen].bounds.size.height-162, [UIScreen mainScreen].bounds.size.width, 162);
-        bottomView.image = [UIImage imageNamed:@"iphonebottomlaunch"
-                                      inBundle: bundle
-                 compatibleWithTraitCollection:nil];
+          if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+              bottomImage = [UIImage imageNamed:@"ipadbottomlaunch" inBundle:bundle compatibleWithTraitCollection:nil];
+          } else {
+              bottomImage = [UIImage imageNamed:@"iphonebottomlaunch" inBundle:bundle compatibleWithTraitCollection:nil];
+          }
 
-    }
+          CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
+          height = bottomImage.size.height * (screenWidth / bottomImage.size.width);
+
+          bottomView.frame = CGRectMake(0, [UIScreen mainScreen].bounds.size.height - height, screenWidth, height);
+          bottomView.image = bottomImage;
+          bottomView.contentMode = UIViewContentModeScaleAspectFill;
 //    [self.splashAd.controller.view addSubview:bottomView];
 //    UIImageView *logoImageView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"ADMob_Logo.png"]];
 //    logoImageView.frame = CGRectMake(([UIScreen mainScreen].bounds.size.width-135)/2, (bottomViewHeight-46)/2, 135, 46);
