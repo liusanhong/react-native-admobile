@@ -11,6 +11,8 @@
     <style name="adSplash" parent="SplashScreen_SplashTheme">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
     </style>
 
     <style name="TransparentProgressDialog" parent="Theme.AppCompat.Dialog">

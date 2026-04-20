@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
+import android.view.View;
+import android.view.WindowInsets;
 import android.widget.ProgressBar;
 
 import com.facebook.react.bridge.Arguments;
@@ -84,6 +86,23 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
             reactContext.runOnUiQueueThread(new Runnable() {
                 @Override
                 public void run() {
+                    // 修复分辨率切换导致 WindowInsets 负数崩溃
+                    try {
+                        android.app.Activity currentActivity = context.getCurrentActivity();
+                        if (currentActivity != null) {
+                            View decorView = currentActivity.getWindow().getDecorView();
+                            decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+                                int top = Math.max(insets.getSystemWindowInsetTop(), 0);
+                                int bottom = Math.max(insets.getSystemWindowInsetBottom(), 0);
+                                int left = Math.max(insets.getSystemWindowInsetLeft(), 0);
+                                int right = Math.max(insets.getSystemWindowInsetRight(), 0);
+                                return insets.replaceSystemWindowInsets(left, top, right, bottom);
+                            });
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "WindowInsets修复异常: " + e.getMessage());
+                    }
+
                     Log.e("initAd::", appID);
                     // 初始化ADSuyi广告SDK
                     TTSYInitManager.getInstance().setSkipInitCount(3);

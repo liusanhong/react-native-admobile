@@ -14,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import java.lang.reflect.Method;
@@ -40,6 +41,16 @@ public class SplashAdActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_ad);
         Log.e(TAG, "进入广告:" + System.currentTimeMillis());
+
+        // 修复分辨率切换导致 WindowInsets 负数崩溃
+        View decorView = getWindow().getDecorView();
+        decorView.setOnApplyWindowInsetsListener((v, insets) -> {
+            int top = Math.max(insets.getSystemWindowInsetTop(), 0);
+            int bottom = Math.max(insets.getSystemWindowInsetBottom(), 0);
+            int left = Math.max(insets.getSystemWindowInsetLeft(), 0);
+            int right = Math.max(insets.getSystemWindowInsetRight(), 0);
+            return insets.replaceSystemWindowInsets(left, top, right, bottom);
+        });
 
         setPortalOrientation();
 
