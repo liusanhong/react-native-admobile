@@ -77,7 +77,6 @@ public class SplashAdActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 
             try {
-                View decorView = getWindow().getDecorView();
                 decorView.setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | // 启用沉浸模式，避免系统栏意外出现
                                 View.SYSTEM_UI_FLAG_FULLSCREEN |     // 隐藏状态栏
