@@ -243,6 +243,10 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
         runOnUiThread(
                 () -> {
                     if (reactContext != null) {
+                        if (reactContext.getCurrentActivity() == null || reactContext.getCurrentActivity().isFinishing() || reactContext.getCurrentActivity().isDestroyed()) {
+                            mRewordError.invoke("activity is null or finishing");
+                            return;
+                        }
 
                         // 创建自定义加载对话框
                         AlertDialog.Builder builder = new AlertDialog.Builder(reactContext.getCurrentActivity());
@@ -252,6 +256,11 @@ public class ReactNativeAdmobileModule extends ReactContextBaseJavaModule implem
                         loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
                         loadingDialog.setCancelable(false);
+                        if (reactContext.getCurrentActivity() == null
+                                || reactContext.getCurrentActivity().isFinishing()
+                                || reactContext.getCurrentActivity().isDestroyed()) {
+                            return;
+                        }
                         loadingDialog.show();
 
                         releaseReward();

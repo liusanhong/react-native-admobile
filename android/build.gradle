@@ -45,24 +45,24 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     // ADSuyiSdk、common和OAID库是必须导入的
-    api 'cn.admobiletop.adsuyi.ad:core:4.0.8.12092' //26.4.17
+    api 'cn.admobiletop.adsuyi.ad:core:4.0.9.03101' //26.5.30
 
 
     // OAID库是必须导入的，请保持和Demo中版本一致
     implementation project(path: ':libsAdmobile')
 //     implementation(name: 'oaid_sdk_1.0.25', ext: 'aar')
     // oaid1.0.25版本适配器，导入1.0.25版本oaid必须的
-    api 'cn.admobiletop.adsuyi.ad:oaid:1.0.25.08024'
+    api 'cn.admobiletop.adsuyi.ad:oaid:1.0.25.12122' //26.5.30
 
     // 天目AdapterSdk，必须的
     // 注意需要额外添加SDK加固对应的混淆配置，具体内容见（5.4.3 混淆配置），如已配置加固混淆请忽略此提示
 //    implementation 'cn.admobiletop.adsuyi.ad.adapter:androidx-tianmu_enc:1.3.3.09261'
-    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:3.0.8.3.01123' //26.4.17
+    api 'cn.admobiletop.adsuyi.ad.adapter:tianmu:3.0.9.2.03163' //26.5.30
 
     // 艾狄墨搏AdapterSdk，可选的
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:admobile-alpha:5.0.7.05171'
     // 广点通（优量汇）AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.680.1550.04081'//26.4.17
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:gdt:4.690.1560.05251'//26.5.30
 
 //      gromore的依赖
 //     implementation "com.pangle.cn:mediation-gdt-adapter:4.561.1431.0" //广点通 adapter//24.5.17
@@ -71,10 +71,10 @@ dependencies {
 //     implementation 'cn.admobiletop.adsuyi.ad.adapter:baidu-enhanced:9.371.10091'//24.12.27
 
     // 头条AdapterSdk，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:7.5.1.0.04081'//26.4.17
+    implementation 'cn.admobiletop.adsuyi.ad.adapter:toutiao:7.6.1.1.05251'//26.5.30
 
     // 快手适配器，可选的
-    implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:5.1.20.1.04081' //26.4.17
+//     implementation 'cn.admobiletop.adsuyi.ad.adapter:ksadbase:3.3.69.10091' //24.12.27
 
      // 华为适配器，可选的
 //      implementation 'cn.admobiletop.adsuyi.ad.adapter:hwpps:13.4.76.300.01031' //25.5.24
