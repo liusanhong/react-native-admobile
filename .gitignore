@@ -29,6 +29,11 @@ build/
 local.properties
 *.iml
 
+android/bin
+android/.project
+
+.claude
+
 # node.js
 #
 node_modules/

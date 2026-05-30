@@ -6,13 +6,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.reactnativeadmobile.views.RNBannerView;
 import com.reactnativeadmobile.views.RNFlowExpressAdView;
 
-import cn.admobiletop.adsuyi.ad.ADSuyiBannerAd;
+import java.util.Map;
+
+import cn.admobiletop.adsuyi.util.ADSuyiDisplayUtil;
 
 
 /**
@@ -39,13 +41,32 @@ public class RNFlowExpressAd extends SimpleViewManager<RNFlowExpressAdView> {
         return new RNFlowExpressAdView(reactContext);
     }
 
+    @Override
+    public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.<String, Object>builder()
+                .put("topNativeRenderSuccess", MapBuilder.of("registrationName", "onNativeRenderSuccess"))
+                .put("topNativeFail", MapBuilder.of("registrationName", "onNativeFail"))
+                .put("topNativeClose", MapBuilder.of("registrationName", "onNativeClose"))
+                .build();
+    }
+
     @ReactProp(name = "posId")
     public void setPosId(RNFlowExpressAdView view, @Nullable String posId) {
         Log.e(TAG,"postID::"+posId);
         view.setCodeId(posId);
     }
 
+    @ReactProp(name = "adWidth")
+    public void setAdWidth(RNFlowExpressAdView view, int adWidth) {
+        Log.d("adDisplay", "android adWidth px:" + ADSuyiDisplayUtil.dp2px(adWidth));
+        view.setAdWidth(ADSuyiDisplayUtil.dp2px(adWidth));
+    }
 
+    @ReactProp(name = "adHeight")
+    public void setAdHeight(RNFlowExpressAdView view, int adHeight) {
+        Log.d("adDisplay", "android adHeight px:" + ADSuyiDisplayUtil.dp2px(adHeight));
+        view.setAdHeight(ADSuyiDisplayUtil.dp2px(adHeight));
+    }
 
 
 }
