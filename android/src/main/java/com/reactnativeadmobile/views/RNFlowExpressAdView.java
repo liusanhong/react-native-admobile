@@ -296,7 +296,7 @@ public class RNFlowExpressAdView extends LinearLayout {
     }
 
     private boolean isInterceptScroll() {
-        return true;
+        return false;
     }
 
     @Override
