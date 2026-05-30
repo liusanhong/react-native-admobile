@@ -90,7 +90,7 @@
 - (void)adsy_nativeAdFailToLoad:(ADSuyiSDKNativeAd *)nativeAd
                      errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
     [self.emitter nativeFeedAdFail:@{
-        @"errorCode": @(errorModel.errorCode ?: 0),
+        @"errorCode": @(errorModel.code),
         @"errorDescription": errorModel.errorDescription ?: @""
     }];
 }

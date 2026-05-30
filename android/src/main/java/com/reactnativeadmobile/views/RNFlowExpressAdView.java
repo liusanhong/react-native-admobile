@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -52,6 +53,10 @@ public class RNFlowExpressAdView extends LinearLayout {
 
     private View nativeExpressAdView;
 
+    private int mTouchSlop;
+    private float mInitialX;
+    private float mInitialY;
+
     /**
      * 通过 RCTEventEmitter 按 view ID 定向发送事件到 JS 端（非全局广播）
      */
@@ -60,30 +65,35 @@ public class RNFlowExpressAdView extends LinearLayout {
         ctx.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), eventName, params);
     }
 
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                if (isInterceptScroll()) {
-                    // 拦截父布局的事件，这样能够触发穿山甲的滑动点击事件，但视频类素材无法触发
-                    getParent().requestDisallowInterceptTouchEvent(true);
-                }
-                break;
-            default:
-                break;
-        }
-        return super.dispatchTouchEvent(ev);
-    }
-
     public RNFlowExpressAdView(ReactContext context) {
         super(context);
         reactContext = context;
         mContext = context;
         mCurrent = this;
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         // 初始化广告渲染组件
         inflate(mContext, R.layout.layout_ad_banner, this);
 // 这个函数很关键，不然不能触发再次渲染，让 view 在 RN 里渲染成功!!
         Utils.setupLayoutHack(this);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mInitialX = ev.getX();
+            mInitialY = ev.getY();
+        }
+        // 先让子 View 处理事件（广告 SDK 会在此调用 requestDisallowInterceptTouchEvent(true)）
+        boolean result = super.dispatchTouchEvent(ev);
+        // 在子 View 处理完毕后清除标记，确保下一个事件时父级 ScrollView 能拦截滚动
+        if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+            float dx = Math.abs(ev.getX() - mInitialX);
+            float dy = Math.abs(ev.getY() - mInitialY);
+            if (dy > mTouchSlop && dy > dx) {
+                requestDisallowInterceptTouchEvent(false);
+            }
+        }
+        return result;
     }
 
     public void setCodeId(String codeId) {
@@ -293,10 +303,6 @@ public class RNFlowExpressAdView extends LinearLayout {
 
         Log.d("adDisplay", "android measuredWidth:" + size[0] + " measuredHeight:" + size[1]);
         return size;
-    }
-
-    private boolean isInterceptScroll() {
-        return false;
     }
 
     @Override
