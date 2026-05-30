@@ -3,9 +3,12 @@ package com.reactnativeadmobile.views;
 import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -20,6 +23,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -234,15 +241,10 @@ public class RNNativeFeedAdView extends LinearLayout {
         rootLayout.setOrientation(LinearLayout.VERTICAL);
         rootLayout.setBackgroundColor(Color.parseColor("#ffffff"));
 
-        // === 1. 主图/视频区域（使用外部传入的高度，减去底部信息栏和 footer 的预估高度） ===
-        int bottomBarHeight = dp2px(52); // 图标+文字+CTA
-        int footerBarHeight = dp2px(22); // 广告标识+关闭
-        int mediaHeight = mAdHeightPx - bottomBarHeight - footerBarHeight;
-        if (mediaHeight <= 0) {
-            mediaHeight = (int) (adWidthPx * 9f / 16f); // fallback
-        }
+        // === 1. 主图/视频区域（16:9 比例，和 SDK Demo 一致） ===
+        int mediaHeight = (int) (adWidthPx * 9f / 16f);
         FrameLayout mediaContainer = new FrameLayout(ctx);
-        mediaContainer.setLayoutParams(new LayoutParams(adWidthPx, mediaHeight));
+        mediaContainer.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mediaHeight));
 
         if (feedAdInfo.hasMediaView()) {
             // 视频广告
@@ -260,7 +262,7 @@ public class RNNativeFeedAdView extends LinearLayout {
                 imageUrl = feedAdInfo.getImageUrlList().get(0);
             }
             if (!TextUtils.isEmpty(imageUrl)) {
-                mainImage.setImageURI(Uri.parse(imageUrl));
+                loadImage(imageUrl, mainImage);
             }
             mediaContainer.addView(mainImage, new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
@@ -279,7 +281,7 @@ public class RNNativeFeedAdView extends LinearLayout {
         iconImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         String iconUrl = feedAdInfo.getIconUrl();
         if (!TextUtils.isEmpty(iconUrl)) {
-            iconImage.setImageURI(Uri.parse(iconUrl));
+            loadImage(iconUrl, iconImage);
         }
         LinearLayout.LayoutParams iconLp = new LinearLayout.LayoutParams(iconSize, iconSize);
         iconLp.rightMargin = dp2px(8);
@@ -370,7 +372,7 @@ public class RNNativeFeedAdView extends LinearLayout {
         rootLayout.addView(footerBar);
 
         // 添加到自身
-        addView(rootLayout, new LayoutParams(adWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT));
+        addView(rootLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         mAdContentView = rootLayout;
 
         // 注册交互（点击、曝光等），必须调用
@@ -446,5 +448,29 @@ public class RNNativeFeedAdView extends LinearLayout {
         }
         mAdContentView = null;
         mExpressAdView = null;
+    }
+
+    /**
+     * 在后台线程加载网络图片并设置到 ImageView
+     */
+    private void loadImage(String imageUrl, ImageView imageView) {
+        new Thread(() -> {
+            try {
+                HttpURLConnection conn = (HttpURLConnection) new URL(imageUrl).openConnection();
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
+                conn.setDoInput(true);
+                conn.connect();
+                InputStream is = conn.getInputStream();
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                is.close();
+                conn.disconnect();
+                if (bitmap != null) {
+                    new Handler(Looper.getMainLooper()).post(() -> imageView.setImageBitmap(bitmap));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "loadImage failed: " + e.getMessage());
+            }
+        }).start();
     }
 }
