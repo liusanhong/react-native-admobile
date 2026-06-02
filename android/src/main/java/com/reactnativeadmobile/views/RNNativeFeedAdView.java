@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import android.widget.ScrollView;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -228,23 +230,26 @@ public class RNNativeFeedAdView extends LinearLayout {
     }
 
     /**
-     * 自渲染广告展示
+     * 自渲染广告展示（按参考 XML 布局实现：3:4 媒体 + 描述 + 图标标题关闭行）
      */
     private void showFeedAd() {
         ADSuyiNativeFeedAdInfo feedAdInfo = (ADSuyiNativeFeedAdInfo) mNativeAdInfo;
         Context ctx = getContext();
         int adWidthPx = mAdWidthPx;
-        int paddingPx = dp2px(12);
 
-        // 根容器
-        LinearLayout rootLayout = new LinearLayout(ctx);
-        rootLayout.setOrientation(LinearLayout.VERTICAL);
+        // 根容器：RelativeLayout，与 XML 中的 rlAdContainer 对应
+        RelativeLayout rootLayout = new RelativeLayout(ctx);
         rootLayout.setBackgroundColor(Color.parseColor("#ffffff"));
+        rootLayout.setLayoutParams(new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        // === 1. 主图/视频区域（16:9 比例，和 SDK Demo 一致） ===
-        int mediaHeight = (int) (adWidthPx * 9f / 16f);
+        // ========== 1. 媒体区域（图片/视频，比例 3:4） ==========
+        int mediaHeight = (int) (adWidthPx * 4f / 3f);
         FrameLayout mediaContainer = new FrameLayout(ctx);
-        mediaContainer.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mediaHeight));
+        mediaContainer.setId(View.generateViewId());
+        RelativeLayout.LayoutParams mediaLp = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, mediaHeight);
+        mediaContainer.setLayoutParams(mediaLp);
 
         if (feedAdInfo.hasMediaView()) {
             // 视频广告
@@ -258,7 +263,8 @@ public class RNNativeFeedAdView extends LinearLayout {
             ImageView mainImage = new ImageView(ctx);
             mainImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
             String imageUrl = feedAdInfo.getImageUrl();
-            if (TextUtils.isEmpty(imageUrl) && feedAdInfo.getImageUrlList() != null && !feedAdInfo.getImageUrlList().isEmpty()) {
+            if (TextUtils.isEmpty(imageUrl) && feedAdInfo.getImageUrlList() != null
+                    && !feedAdInfo.getImageUrlList().isEmpty()) {
                 imageUrl = feedAdInfo.getImageUrlList().get(0);
             }
             if (!TextUtils.isEmpty(imageUrl)) {
@@ -267,121 +273,119 @@ public class RNNativeFeedAdView extends LinearLayout {
             mediaContainer.addView(mainImage, new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         }
-        rootLayout.addView(mediaContainer);
+        rootLayout.addView(mediaContainer, mediaLp);
 
-        // === 2. 底部信息栏（图标 + 标题描述 + CTA按钮） ===
-        LinearLayout bottomBar = new LinearLayout(ctx);
-        bottomBar.setOrientation(LinearLayout.HORIZONTAL);
-        bottomBar.setGravity(Gravity.CENTER_VERTICAL);
-        bottomBar.setPadding(paddingPx, dp2px(8), paddingPx, dp2px(8));
-
-        // 图标
-        int iconSize = dp2px(36);
-        ImageView iconImage = new ImageView(ctx);
-        iconImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        String iconUrl = feedAdInfo.getIconUrl();
-        if (!TextUtils.isEmpty(iconUrl)) {
-            loadImage(iconUrl, iconImage);
-        }
-        LinearLayout.LayoutParams iconLp = new LinearLayout.LayoutParams(iconSize, iconSize);
-        iconLp.rightMargin = dp2px(8);
-        bottomBar.addView(iconImage, iconLp);
-
-        // 标题和描述
-        LinearLayout textContainer = new LinearLayout(ctx);
-        textContainer.setOrientation(LinearLayout.VERTICAL);
-        textContainer.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-        TextView titleView = new TextView(ctx);
-        titleView.setText(feedAdInfo.getTitle());
-        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        titleView.setTextColor(Color.parseColor("#333333"));
-        titleView.setTypeface(null, Typeface.BOLD);
-        titleView.setMaxLines(1);
-        titleView.setEllipsize(TextUtils.TruncateAt.END);
-        textContainer.addView(titleView);
-
-        TextView descView = new TextView(ctx);
-        descView.setText(feedAdInfo.getDesc());
-        descView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        descView.setTextColor(Color.parseColor("#999999"));
-        descView.setMaxLines(1);
-        descView.setEllipsize(TextUtils.TruncateAt.END);
-        textContainer.addView(descView);
-
-        bottomBar.addView(textContainer);
-
-        // CTA 按钮
-        String ctaText = feedAdInfo.getCtaText();
-        if (TextUtils.isEmpty(ctaText)) {
-            ctaText = "查看";
-        }
-        TextView ctaButton = new TextView(ctx);
-        ctaButton.setText(ctaText);
-        ctaButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-        ctaButton.setTextColor(Color.WHITE);
-        ctaButton.setBackgroundColor(Color.parseColor("#4A90D9"));
-        ctaButton.setGravity(Gravity.CENTER);
-        ctaButton.setPadding(dp2px(12), dp2px(4), dp2px(12), dp2px(4));
-        LinearLayout.LayoutParams ctaLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp2px(28));
-        ctaLp.leftMargin = dp2px(8);
-        bottomBar.addView(ctaButton, ctaLp);
-
-        rootLayout.addView(bottomBar);
-
-        // === 3. 广告标识 + 平台 logo + 关闭按钮 ===
-        RelativeLayout footerBar = new RelativeLayout(ctx);
-        footerBar.setPadding(paddingPx, 0, paddingPx, dp2px(6));
-
-        // 平台 logo
+        // ========== 2. 广告标识 ivAdTarget（右下角） ==========
+        ImageView ivAdTarget = new ImageView(ctx);
+        ivAdTarget.setId(View.generateViewId());
         int platformIconRes = feedAdInfo.getPlatformIcon();
         if (platformIconRes != 0) {
-            ImageView logoView = new ImageView(ctx);
-            logoView.setImageResource(platformIconRes);
-            RelativeLayout.LayoutParams logoLp = new RelativeLayout.LayoutParams(dp2px(40), dp2px(16));
-            logoLp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            logoLp.addRule(RelativeLayout.CENTER_VERTICAL);
-            footerBar.addView(logoView, logoLp);
+            ivAdTarget.setImageResource(platformIconRes);
+        } else {
+            ivAdTarget.setVisibility(View.GONE);
         }
+        ivAdTarget.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        RelativeLayout.LayoutParams targetLp = new RelativeLayout.LayoutParams(dp2px(46), dp2px(18));
+        targetLp.addRule(RelativeLayout.ALIGN_RIGHT, mediaContainer.getId());
+        targetLp.addRule(RelativeLayout.ALIGN_BOTTOM, mediaContainer.getId());
+        rootLayout.addView(ivAdTarget, targetLp);
 
-        // "广告"标签
-        TextView adLabel = new TextView(ctx);
-        adLabel.setText("广告");
-        adLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
-        adLabel.setTextColor(Color.parseColor("#CCCCCC"));
-        adLabel.setBackgroundResource(android.R.drawable.edit_text);
-        adLabel.setPadding(dp2px(2), 0, dp2px(2), 0);
-        adLabel.setGravity(Gravity.CENTER);
-        RelativeLayout.LayoutParams labelLp = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp2px(14));
-        labelLp.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        labelLp.addRule(RelativeLayout.CENTER_VERTICAL);
-        footerBar.addView(adLabel, labelLp);
+        // ========== 3. 描述 tvDesc ==========
+        TextView tvDesc = new TextView(ctx);
+        tvDesc.setId(View.generateViewId());
+        tvDesc.setText(feedAdInfo.getDesc());
+        tvDesc.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        tvDesc.setTextColor(Color.parseColor("#555555"));
+        tvDesc.setMaxLines(2);
+        tvDesc.setEllipsize(TextUtils.TruncateAt.END);
+        RelativeLayout.LayoutParams descLp = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        descLp.addRule(RelativeLayout.BELOW, mediaContainer.getId());
+        descLp.setMargins(dp2px(10), dp2px(10), dp2px(10), 0);
+        rootLayout.addView(tvDesc, descLp);
 
-        // 关闭按钮
-        TextView closeBtn = new TextView(ctx);
-        closeBtn.setText("✕");
-        closeBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        closeBtn.setTextColor(Color.parseColor("#999999"));
-        closeBtn.setGravity(Gravity.CENTER);
-        int closeSize = dp2px(24);
-        RelativeLayout.LayoutParams closeLp = new RelativeLayout.LayoutParams(closeSize, closeSize);
+        // ========== 4. 图标卡片 cvIcon（CardView + ivIcon） ==========
+        int iconSize = dp2px(16);
+        FrameLayout cvIcon = new FrameLayout(ctx);
+        cvIcon.setId(View.generateViewId());
+        // 用 GradientDrawable 实现圆角
+        android.graphics.drawable.GradientDrawable iconBg = new android.graphics.drawable.GradientDrawable();
+        iconBg.setCornerRadius(iconSize / 2f);
+        iconBg.setColor(Color.parseColor("#eeeeee"));
+        cvIcon.setBackground(iconBg);
+        RelativeLayout.LayoutParams iconCardLp = new RelativeLayout.LayoutParams(iconSize, iconSize);
+        iconCardLp.addRule(RelativeLayout.BELOW, tvDesc.getId());
+        iconCardLp.addRule(RelativeLayout.ALIGN_LEFT, tvDesc.getId());
+        iconCardLp.setMargins(0, dp2px(10), 0, dp2px(10));
+        rootLayout.addView(cvIcon, iconCardLp);
+
+        ImageView ivIcon = new ImageView(ctx);
+        ivIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        String iconUrl = feedAdInfo.getIconUrl();
+        if (!TextUtils.isEmpty(iconUrl)) {
+            loadImage(iconUrl, ivIcon);
+        }
+        cvIcon.addView(ivIcon, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // ========== 5. 关闭按钮 ivClose ==========
+        ImageView ivClose = new ImageView(ctx);
+        ivClose.setId(View.generateViewId());
+        // 尝试加载 app 的 icon_close_2 资源，找不到则代码绘制
+        int closeResId = ctx.getResources().getIdentifier("icon_close_2", "drawable", ctx.getPackageName());
+        if (closeResId != 0) {
+            ivClose.setImageResource(closeResId);
+        } else {
+            // 用代码绘制简单的关闭 X 图标
+            int closeSizePx = dp2px(20);
+            Bitmap closeBitmap = Bitmap.createBitmap(closeSizePx, closeSizePx, Bitmap.Config.ARGB_8888);
+            android.graphics.Canvas canvas = new android.graphics.Canvas(closeBitmap);
+            android.graphics.Paint paint = new android.graphics.Paint();
+            paint.setAntiAlias(true);
+            paint.setColor(Color.parseColor("#999999"));
+            paint.setStrokeWidth(dp2px(1.5f));
+            paint.setStyle(android.graphics.Paint.Style.STROKE);
+            int pad = dp2px(4);
+            canvas.drawLine(pad, pad, closeSizePx - pad, closeSizePx - pad, paint);
+            canvas.drawLine(closeSizePx - pad, pad, pad, closeSizePx - pad, paint);
+            ivClose.setImageBitmap(closeBitmap);
+        }
+        ivClose.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        RelativeLayout.LayoutParams closeLp = new RelativeLayout.LayoutParams(dp2px(20), dp2px(20));
         closeLp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        closeLp.addRule(RelativeLayout.CENTER_VERTICAL);
-        footerBar.addView(closeBtn, closeLp);
+        closeLp.addRule(RelativeLayout.ALIGN_TOP, cvIcon.getId());
+        closeLp.addRule(RelativeLayout.ALIGN_BOTTOM, cvIcon.getId());
+        closeLp.rightMargin = dp2px(10);
+        rootLayout.addView(ivClose, closeLp);
 
-        rootLayout.addView(footerBar);
+        // ========== 6. 标题 tvTitle ==========
+        TextView tvTitle = new TextView(ctx);
+        tvTitle.setId(View.generateViewId());
+        tvTitle.setText(feedAdInfo.getTitle());
+        tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+        tvTitle.setTextColor(Color.parseColor("#555555"));
+        tvTitle.setMaxLines(1);
+        tvTitle.setEllipsize(TextUtils.TruncateAt.END);
+        RelativeLayout.LayoutParams titleLp = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        titleLp.addRule(RelativeLayout.RIGHT_OF, cvIcon.getId());
+        titleLp.addRule(RelativeLayout.ALIGN_TOP, cvIcon.getId());
+        titleLp.addRule(RelativeLayout.ALIGN_BOTTOM, cvIcon.getId());
+        titleLp.addRule(RelativeLayout.LEFT_OF, ivClose.getId());
+        titleLp.setMargins(dp2px(8), 0, 0, 0);
+        rootLayout.addView(tvTitle, titleLp);
 
-        // 添加到自身
+        // ========== 7. 添加到当前 View，并注册广告交互 ==========
         addView(rootLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         mAdContentView = rootLayout;
 
-        // 注册交互（点击、曝光等），必须调用
-        feedAdInfo.registerViewForInteraction(rootLayout, mediaContainer, ctaButton);
+        // 注册可点击视图
+        feedAdInfo.registerViewForInteraction(rootLayout, mediaContainer, tvDesc, cvIcon, tvTitle, ivAdTarget);
 
-        // 注册关闭按钮，必须调用，关闭后回调 onAdClose
-        feedAdInfo.registerCloseView(closeBtn);
+        // 注册关闭按钮
+        feedAdInfo.registerCloseView(ivClose);
 
-        // 立即测量并发送高度（自渲染不需要等 onRenderSuccess）
+        // 测量并发送高度
         post(() -> sendHeightEvent());
     }
 
