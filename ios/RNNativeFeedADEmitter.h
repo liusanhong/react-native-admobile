@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)nativeFeedAdRenderSuccess:(NSDictionary *)sizeInfo;
 - (void)nativeFeedAdFail:(NSDictionary *)errorInfo;
-- (void)nativeFeedAdClose;
+- (void)nativeFeedAdClose:(NSDictionary *)info;
 
 @end
 

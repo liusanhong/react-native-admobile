@@ -331,25 +331,19 @@ public class RNNativeFeedAdView extends LinearLayout {
         // ========== 5. 关闭按钮 ivClose ==========
         ImageView ivClose = new ImageView(ctx);
         ivClose.setId(View.generateViewId());
-        // 尝试加载 app 的 icon_close_2 资源，找不到则代码绘制
-        int closeResId = ctx.getResources().getIdentifier("icon_close_2", "drawable", ctx.getPackageName());
-        if (closeResId != 0) {
-            ivClose.setImageResource(closeResId);
-        } else {
-            // 用代码绘制简单的关闭 X 图标
-            int closeSizePx = dp2px(20);
-            Bitmap closeBitmap = Bitmap.createBitmap(closeSizePx, closeSizePx, Bitmap.Config.ARGB_8888);
-            android.graphics.Canvas canvas = new android.graphics.Canvas(closeBitmap);
-            android.graphics.Paint paint = new android.graphics.Paint();
-            paint.setAntiAlias(true);
-            paint.setColor(Color.parseColor("#999999"));
-            paint.setStrokeWidth(dp2px(1.5f));
-            paint.setStyle(android.graphics.Paint.Style.STROKE);
-            int pad = dp2px(4);
-            canvas.drawLine(pad, pad, closeSizePx - pad, closeSizePx - pad, paint);
-            canvas.drawLine(closeSizePx - pad, pad, pad, closeSizePx - pad, paint);
-            ivClose.setImageBitmap(closeBitmap);
-        }
+        // 用代码绘制深色关闭 X 图标（icon_close_2 为白色，在白色背景上不可见）
+        int closeSizePx = dp2px(20);
+        Bitmap closeBitmap = Bitmap.createBitmap(closeSizePx, closeSizePx, Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas canvas = new android.graphics.Canvas(closeBitmap);
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setAntiAlias(true);
+        paint.setColor(Color.parseColor("#333333"));
+        paint.setStrokeWidth(dp2px(2));
+        paint.setStyle(android.graphics.Paint.Style.STROKE);
+        int pad = dp2px(4);
+        canvas.drawLine(pad, pad, closeSizePx - pad, closeSizePx - pad, paint);
+        canvas.drawLine(closeSizePx - pad, pad, pad, closeSizePx - pad, paint);
+        ivClose.setImageBitmap(closeBitmap);
         ivClose.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         RelativeLayout.LayoutParams closeLp = new RelativeLayout.LayoutParams(dp2px(20), dp2px(20));
         closeLp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);

@@ -35,9 +35,9 @@ RCT_EXPORT_MODULE();
     });
 }
 
-- (void)nativeFeedAdClose {
+- (void)nativeFeedAdClose:(NSDictionary *)info {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self sendEventWithName:@"nativeFeedAdClose" body:nil];
+        [self sendEventWithName:@"nativeFeedAdClose" body:info];
     });
 }
 

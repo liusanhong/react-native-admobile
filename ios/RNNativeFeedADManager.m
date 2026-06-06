@@ -90,6 +90,7 @@
 - (void)adsy_nativeAdFailToLoad:(ADSuyiSDKNativeAd *)nativeAd
                      errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
     [self.emitter nativeFeedAdFail:@{
+        @"posId": self.posId ?: @"",
         @"errorCode": @(errorModel.code),
         @"errorDescription": errorModel.errorDescription ?: @""
     }];
@@ -111,6 +112,7 @@
 
         // 发送渲染成功事件
         [self.emitter nativeFeedAdRenderSuccess:@{
+            @"posId": self.posId ?: @"",
             @"width": @(w),
             @"height": @(h)
         }];
@@ -131,7 +133,9 @@
 - (void)adsy_nativeAdClose:(ADSuyiSDKNativeAd *)nativeAd
                     adView:(__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.emitter nativeFeedAdClose];
+        [self.emitter nativeFeedAdClose:@{
+            @"posId": self.posId ?: @""
+        }];
     });
 }
 
