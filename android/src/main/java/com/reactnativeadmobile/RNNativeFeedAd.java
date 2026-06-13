@@ -65,4 +65,10 @@ public class RNNativeFeedAd extends SimpleViewManager<RNNativeFeedAdView> {
         Log.d(TAG, "setAdHeight dp:" + adHeight + " px:" + ADSuyiDisplayUtil.dp2px(adHeight));
         view.setAdHeight(ADSuyiDisplayUtil.dp2px(adHeight));
     }
+
+    @ReactProp(name = "maxMediaHeight")
+    public void setMaxMediaHeight(RNNativeFeedAdView view, int maxMediaHeight) {
+        Log.d(TAG, "setMaxMediaHeight dp:" + maxMediaHeight + " px:" + ADSuyiDisplayUtil.dp2px(maxMediaHeight));
+        view.setMaxMediaHeight(ADSuyiDisplayUtil.dp2px(maxMediaHeight));
+    }
 }

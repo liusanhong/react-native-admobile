@@ -61,6 +61,7 @@ public class RNNativeFeedAdView extends LinearLayout {
     private String mPosId;
     private int mAdWidthPx;
     private int mAdHeightPx;
+    private int mMaxMediaHeightPx;
     private String TAG = "RNNativeFeedAdView";
     private ADSuyiNativeAd mNativeAd;
     private ADSuyiNativeAdInfo mNativeAdInfo;
@@ -108,6 +109,10 @@ public class RNNativeFeedAdView extends LinearLayout {
 
     public void setAdHeight(int heightPx) {
         mAdHeightPx = heightPx;
+    }
+
+    public void setMaxMediaHeight(int heightPx) {
+        mMaxMediaHeightPx = heightPx;
     }
 
     private void loadAd() {
@@ -276,7 +281,8 @@ public class RNNativeFeedAdView extends LinearLayout {
         } else {
             // 图片广告
             ImageView mainImage = new ImageView(ctx);
-            mainImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            mainImage.setBackgroundColor(Color.parseColor("#ffffff"));
+            mainImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
             if (mainBitmap != null) {
                 mainImage.setImageBitmap(mainBitmap);
             } else if (!TextUtils.isEmpty(imageUrl)) {
@@ -411,14 +417,22 @@ public class RNNativeFeedAdView extends LinearLayout {
     }
 
     private int calculateMediaHeight(int imageWidth, int imageHeight) {
+        int mediaHeight = getFallbackMediaHeight();
         if (imageWidth > 0 && imageHeight > 0 && mAdWidthPx > 0) {
-            return Math.max(1, Math.round(mAdWidthPx * imageHeight / (float) imageWidth));
+            mediaHeight = Math.max(1, Math.round(mAdWidthPx * imageHeight / (float) imageWidth));
         }
-        return getFallbackMediaHeight();
+        return limitMediaHeight(mediaHeight);
     }
 
     private int getFallbackMediaHeight() {
-        return mAdHeightPx > 0 ? mAdHeightPx : (int) (mAdWidthPx * 4f / 3f);
+        return limitMediaHeight(mAdHeightPx > 0 ? mAdHeightPx : (int) (mAdWidthPx * 4f / 3f));
+    }
+
+    private int limitMediaHeight(int mediaHeight) {
+        if (mMaxMediaHeightPx > 0) {
+            return Math.min(mediaHeight, mMaxMediaHeightPx);
+        }
+        return mediaHeight;
     }
 
     /**
