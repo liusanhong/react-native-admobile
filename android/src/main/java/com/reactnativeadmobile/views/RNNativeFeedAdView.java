@@ -86,13 +86,6 @@ public class RNNativeFeedAdView extends LinearLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                getParent().requestDisallowInterceptTouchEvent(true);
-                break;
-            default:
-                break;
-        }
         return super.dispatchTouchEvent(ev);
     }
 
