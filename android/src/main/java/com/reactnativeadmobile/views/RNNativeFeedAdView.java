@@ -73,6 +73,11 @@ public class RNNativeFeedAdView extends LinearLayout {
     private float density;
     // 标记是否已发送过高度事件，避免 onRenderSuccess 和 showFeedAd 重复发送
     private boolean mHeightEventSent = false;
+    private int mFeedContentHeightPx = 0;
+
+    private interface ImageLoadCallback {
+        void onResult(@Nullable Bitmap bitmap, int width, int height);
+    }
 
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         ReactContext ctx = (ReactContext) getContext();
@@ -122,6 +127,7 @@ public class RNNativeFeedAdView extends LinearLayout {
 
         releaseAd();
         mHeightEventSent = false;
+        mFeedContentHeightPx = 0;
 
         mNativeAd = new ADSuyiNativeAd(reactContext.getCurrentActivity());
 
@@ -234,6 +240,23 @@ public class RNNativeFeedAdView extends LinearLayout {
      */
     private void showFeedAd() {
         ADSuyiNativeFeedAdInfo feedAdInfo = (ADSuyiNativeFeedAdInfo) mNativeAdInfo;
+        String imageUrl = getFeedImageUrl(feedAdInfo);
+
+        if (!feedAdInfo.hasMediaView() && !TextUtils.isEmpty(imageUrl)) {
+            loadImageBitmap(imageUrl, (bitmap, width, height) -> {
+                if (mNativeAdInfo != feedAdInfo || ADSuyiAdUtil.adInfoIsRelease(feedAdInfo)) {
+                    return;
+                }
+                int mediaHeight = calculateMediaHeight(width, height);
+                renderFeedAd(feedAdInfo, imageUrl, bitmap, mediaHeight);
+            });
+            return;
+        }
+
+        renderFeedAd(feedAdInfo, imageUrl, null, getFallbackMediaHeight());
+    }
+
+    private void renderFeedAd(ADSuyiNativeFeedAdInfo feedAdInfo, String imageUrl, @Nullable Bitmap mainBitmap, int mediaHeight) {
         Context ctx = getContext();
         int adWidthPx = mAdWidthPx;
 
@@ -243,8 +266,7 @@ public class RNNativeFeedAdView extends LinearLayout {
         rootLayout.setLayoutParams(new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        // ========== 1. 媒体区域（图片/视频，比例 3:4） ==========
-        int mediaHeight = (int) (adWidthPx * 4f / 3f);
+        // ========== 1. 媒体区域（图片优先使用真实比例，视频使用传入/兜底高度） ==========
         FrameLayout mediaContainer = new FrameLayout(ctx);
         mediaContainer.setId(View.generateViewId());
         RelativeLayout.LayoutParams mediaLp = new RelativeLayout.LayoutParams(
@@ -262,12 +284,9 @@ public class RNNativeFeedAdView extends LinearLayout {
             // 图片广告
             ImageView mainImage = new ImageView(ctx);
             mainImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            String imageUrl = feedAdInfo.getImageUrl();
-            if (TextUtils.isEmpty(imageUrl) && feedAdInfo.getImageUrlList() != null
-                    && !feedAdInfo.getImageUrlList().isEmpty()) {
-                imageUrl = feedAdInfo.getImageUrlList().get(0);
-            }
-            if (!TextUtils.isEmpty(imageUrl)) {
+            if (mainBitmap != null) {
+                mainImage.setImageBitmap(mainBitmap);
+            } else if (!TextUtils.isEmpty(imageUrl)) {
                 loadImage(imageUrl, mainImage);
             }
             mediaContainer.addView(mainImage, new FrameLayout.LayoutParams(
@@ -369,6 +388,12 @@ public class RNNativeFeedAdView extends LinearLayout {
         titleLp.setMargins(dp2px(8), 0, 0, 0);
         rootLayout.addView(tvTitle, titleLp);
 
+        int descWidthSpec = View.MeasureSpec.makeMeasureSpec(Math.max(1, adWidthPx - dp2px(20)), View.MeasureSpec.EXACTLY);
+        int unspecifiedHeightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        tvDesc.measure(descWidthSpec, unspecifiedHeightSpec);
+        int descHeight = Math.max(tvDesc.getMeasuredHeight(), dp2px(18));
+        mFeedContentHeightPx = mediaHeight + dp2px(10) + descHeight + dp2px(10) + iconSize + dp2px(10);
+
         // ========== 7. 添加到当前 View，并注册广告交互 ==========
         addView(rootLayout, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         mAdContentView = rootLayout;
@@ -383,6 +408,26 @@ public class RNNativeFeedAdView extends LinearLayout {
         post(() -> sendHeightEvent());
     }
 
+    private String getFeedImageUrl(ADSuyiNativeFeedAdInfo feedAdInfo) {
+        String imageUrl = feedAdInfo.getImageUrl();
+        if (TextUtils.isEmpty(imageUrl) && feedAdInfo.getImageUrlList() != null
+                && !feedAdInfo.getImageUrlList().isEmpty()) {
+            imageUrl = feedAdInfo.getImageUrlList().get(0);
+        }
+        return imageUrl;
+    }
+
+    private int calculateMediaHeight(int imageWidth, int imageHeight) {
+        if (imageWidth > 0 && imageHeight > 0 && mAdWidthPx > 0) {
+            return Math.max(1, Math.round(mAdWidthPx * imageHeight / (float) imageWidth));
+        }
+        return getFallbackMediaHeight();
+    }
+
+    private int getFallbackMediaHeight() {
+        return mAdHeightPx > 0 ? mAdHeightPx : (int) (mAdWidthPx * 4f / 3f);
+    }
+
     /**
      * 测量并发送广告高度事件
      */
@@ -390,15 +435,18 @@ public class RNNativeFeedAdView extends LinearLayout {
         if (mHeightEventSent) {
             return;
         }
-        mHeightEventSent = true;
 
         View targetView = mAdContentView != null ? mAdContentView : mExpressAdView;
         if (targetView == null || mNativeAdInfo == null) {
             return;
         }
+        mHeightEventSent = true;
 
         int[] size = measureView(targetView);
         int adHeightPx = size[1] > 0 ? size[1] : mAdHeightPx;
+        if (!mNativeAdInfo.isNativeExpress() && mFeedContentHeightPx > 0) {
+            adHeightPx = Math.max(adHeightPx, mFeedContentHeightPx);
+        }
 
         if ("gdt".equals(mNativeAdInfo.getPlatform())) {
             if (adHeightPx < 143) {
@@ -446,12 +494,21 @@ public class RNNativeFeedAdView extends LinearLayout {
         }
         mAdContentView = null;
         mExpressAdView = null;
+        mFeedContentHeightPx = 0;
     }
 
     /**
      * 在后台线程加载网络图片并设置到 ImageView
      */
     private void loadImage(String imageUrl, ImageView imageView) {
+        loadImageBitmap(imageUrl, (bitmap, width, height) -> {
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            }
+        });
+    }
+
+    private void loadImageBitmap(String imageUrl, ImageLoadCallback callback) {
         new Thread(() -> {
             try {
                 HttpURLConnection conn = (HttpURLConnection) new URL(imageUrl).openConnection();
@@ -464,11 +521,13 @@ public class RNNativeFeedAdView extends LinearLayout {
                 is.close();
                 conn.disconnect();
                 if (bitmap != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> imageView.setImageBitmap(bitmap));
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onResult(bitmap, bitmap.getWidth(), bitmap.getHeight()));
+                    return;
                 }
             } catch (Exception e) {
                 Log.e(TAG, "loadImage failed: " + e.getMessage());
             }
+            new Handler(Looper.getMainLooper()).post(() -> callback.onResult(null, 0, 0));
         }).start();
     }
 }
