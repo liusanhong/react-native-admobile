@@ -22,16 +22,36 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
+        self.userInteractionEnabled = YES;
+        self.exclusiveTouch = YES;  // 独占触摸事件，防止传递给其他视图
+
+        // 使用手势识别器，更可靠地阻止事件传播
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+        tapGesture.cancelsTouchesInView = YES;  // 阻止事件传递给下层视图
+        [self addGestureRecognizer:tapGesture];
     }
     return self;
 }
 
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    // 执行关闭操作
+- (void)handleTap:(UITapGestureRecognizer *)gesture {
     if (self.onCloseAction) {
         self.onCloseAction();
     }
-    // 不调用 super，阻止事件传播
+}
+
+// 扩大点击区域，实际点击区域比视觉区域大 10dp
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+    CGFloat expandSize = 10;  // 扩大 10dp
+    CGRect expandedBounds = CGRectInset(self.bounds, -expandSize, -expandSize);
+    return CGRectContainsPoint(expandedBounds, point);
+}
+
+// 确保点击关闭按钮时，只有按钮响应
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    if ([self pointInside:point withEvent:event]) {
+        return self;  // 返回自己，不传递给下层
+    }
+    return nil;
 }
 
 @end
@@ -103,11 +123,12 @@
                       adViewArray:(NSArray<__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *> *)adViewArray {
     for (UIView<ADSuyiAdapterNativeAdViewDelegate> *adView in adViewArray) {
         if (adView.renderType == ADSuyiAdapterRenderTypeNative) {
-            // 自渲染：拼装原生 UI
+            // 自渲染：拼装原生 UI（内部会在关闭按钮创建后注册交互）
             [self setUpTopImageNativeAdView:adView];
+        } else {
+            // 模板渲染直接注册
+            [adView adsy_registViews:@[adView]];
         }
-        // 注册交互
-        [adView adsy_registViews:@[adView]];
 
         // 广点通视频广告特殊处理
         if ([adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]
@@ -213,16 +234,20 @@
 
     // ========== 1. 媒体区域 (图片/视频) ==========
     CGRect mainFrame = CGRectMake(10, 0, mediaWidth, mediaHeight);
+    UIView *mediaViewForClick = nil;  // 保存媒体视图用于注册点击
     if (adView.data.shouldShowMediaView) {
         UIView *mediaView = [adView adsy_mediaViewForWidth:mainFrame.size.width];
         mediaView.frame = mainFrame;
         mediaView.userInteractionEnabled = NO;
+        mediaViewForClick = mediaView;  // 保存引用
         [adView addSubview:mediaView];
     } else {
         UIImageView *imageView = [UIImageView new];
         imageView.backgroundColor = [UIColor adsy_colorWithHexString:@"#F5F5F5"];
+        imageView.userInteractionEnabled = NO;  // 禁止用户交互
         [adView addSubview:imageView];
         imageView.frame = mainFrame;
+        mediaViewForClick = imageView;  // 保存引用，用于注册点击
         NSString *urlStr = adView.data.imageUrl;
         if (urlStr.length > 0) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -279,8 +304,9 @@
     CGFloat titleRight = adWidth - 10 - closeSize - 10;  // 右边距 - 关闭按钮 - 间距
     titleLabel.frame = CGRectMake(titleLeft, titleTop, titleRight - titleLeft, closeSize);
 
-    // 关闭按钮 (X 图标) - 使用自定义视图防止触发广告点击
-    RNCloseButtonView *closeButton = [[RNCloseButtonView alloc] initWithFrame:CGRectMake(adWidth - 10 - closeSize, titleTop, closeSize, closeSize)];
+    // 关闭按钮 (X 图标) - 放在右上角，使用自定义视图防止触发广告点击
+    CGFloat closeTop = 10;  // 距离顶部 10dp
+    RNCloseButtonView *closeButton = [[RNCloseButtonView alloc] initWithFrame:CGRectMake(adWidth - 10 - closeSize, closeTop, closeSize, closeSize)];
     closeButton.targetAdView = adView;
 
     // 保存关闭按钮引用，以便后续移除
@@ -324,6 +350,15 @@
 
     // 将关闭按钮添加到 adView
     [adView addSubview:closeButton];
+
+    // 注册交互：只注册媒体视图（图片/视频区域），不包含关闭按钮
+    // 只有点击媒体区域才会触发广告点击
+    if (mediaViewForClick) {
+        [adView adsy_registViews:@[mediaViewForClick]];
+    } else {
+        // 如果没有媒体视图，注册整个 adView
+        [adView adsy_registViews:@[adView]];
+    }
 }
 
 @end
