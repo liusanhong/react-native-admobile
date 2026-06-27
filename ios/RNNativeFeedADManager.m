@@ -10,12 +10,42 @@
 #import <ADSuyiKit/UIColor+ADSuyiKit.h>
 #import <objc/runtime.h>
 
+// 自定义关闭按钮视图，阻止事件传播到广告层
+@interface RNCloseButtonView : UIView
+@property (nonatomic, weak) UIView<ADSuyiAdapterNativeAdViewDelegate> *targetAdView;
+@property (nonatomic, copy) dispatch_block_t onCloseAction;
+@end
+
+@implementation RNCloseButtonView
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor clearColor];
+    }
+    return self;
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    // 执行关闭操作
+    if (self.onCloseAction) {
+        self.onCloseAction();
+    }
+    // 不调用 super，阻止事件传播
+}
+
+@end
+
 @interface RNNativeFeedADView : UIView <ADSuyiSDKNativeAdDelegate>
 @property (nonatomic, copy) NSString *posId;
 @property (nonatomic, assign) CGFloat adWidthDp;
+@property (nonatomic, assign) CGFloat adHeightDp;
+@property (nonatomic, assign) CGFloat maxMediaHeightDp;
 @property (nonatomic, strong) ADSuyiSDKNativeAd *nativeAd;
 @property (nonatomic, strong) RNNativeFeedADEmitter *emitter;
 @property (nonatomic, weak) RNNativeFeedADView *weakSelf;
+@property (nonatomic, strong) UIView<ADSuyiAdapterNativeAdViewDelegate> *currentAdView;
+@property (nonatomic, strong) RNCloseButtonView *closeButtonView;
 @end
 
 @implementation RNNativeFeedADView
@@ -24,6 +54,8 @@
     self = [super initWithFrame:frame];
     if (self) {
         _adWidthDp = 0;
+        _adHeightDp = 0;
+        _maxMediaHeightDp = 0;
     }
     return self;
 }
@@ -145,32 +177,50 @@
 
 #pragma mark - Self-rendering UI: 上图下文样式
 
-- (void)setUpTopImageNativeAdView:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
+// 限制媒体高度
+- (CGFloat)limitMediaHeight:(CGFloat)mediaHeight {
+    if (self.maxMediaHeightDp > 0) {
+        return MIN(mediaHeight, self.maxMediaHeightDp);
+    }
+    return mediaHeight;
+}
+
+// 获取默认媒体高度
+- (CGFloat)getFallbackMediaHeight {
     CGFloat adWidth = self.adWidthDp > 0 ? self.adWidthDp : [UIScreen mainScreen].bounds.size.width;
-    CGFloat adHeight = (adWidth - 17 * 2) / 16.0 * 9 + 70;
+    CGFloat defaultHeight = adWidth * 4.0 / 3.0;
+    if (self.adHeightDp > 0) {
+        defaultHeight = self.adHeightDp;
+    }
+    return [self limitMediaHeight:defaultHeight];
+}
+
+- (void)setUpTopImageNativeAdView:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
+    // 保存当前 adView 引用，用于后续排除关闭按钮
+    self.currentAdView = adView;
+
+    CGFloat adWidth = self.adWidthDp > 0 ? self.adWidthDp : [UIScreen mainScreen].bounds.size.width;
+
+    // 使用 3:4 比例，匹配 Android 实现
+    CGFloat mediaWidth = adWidth - 10 * 2;  // 左右各 10dp margin
+    CGFloat mediaHeight = [self getFallbackMediaHeight];  // 应用 maxHeight 限制
+    CGFloat descHeight = 36;  // 描述行高度 (2行)
+    CGFloat closeSize = 20;  // 关闭按钮尺寸
+    CGFloat titleRowHeight = closeSize;  // 标题行高度
+    CGFloat adHeight = mediaHeight + 10 + descHeight + 10 + titleRowHeight;  // 总高度
+
     adView.frame = CGRectMake(0, 0, adWidth, adHeight);
 
-    // Logo
-    if (![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) {
-        UIImageView *logoImage = [UIImageView new];
-        [adView addSubview:logoImage];
-        [adView adsy_platformLogoImageDarkMode:NO loadImageBlock:^(UIImage * _Nullable image) {
-            CGFloat maxWidth = 40;
-            CGFloat logoHeight = maxWidth / image.size.width * image.size.height;
-            logoImage.frame = CGRectMake(adWidth - maxWidth, adHeight - logoHeight, maxWidth, logoHeight);
-            logoImage.image = image;
-        }];
-    }
-
-    // 主图/视频
-    CGRect mainFrame = CGRectMake(17, 0, adWidth - 17 * 2, (adWidth - 17 * 2) / 16.0 * 9);
+    // ========== 1. 媒体区域 (图片/视频) ==========
+    CGRect mainFrame = CGRectMake(10, 0, mediaWidth, mediaHeight);
     if (adView.data.shouldShowMediaView) {
         UIView *mediaView = [adView adsy_mediaViewForWidth:mainFrame.size.width];
         mediaView.frame = mainFrame;
+        mediaView.userInteractionEnabled = NO;
         [adView addSubview:mediaView];
     } else {
         UIImageView *imageView = [UIImageView new];
-        imageView.backgroundColor = [UIColor adsy_colorWithHexString:@"#CCCCCC"];
+        imageView.backgroundColor = [UIColor adsy_colorWithHexString:@"#F5F5F5"];
         [adView addSubview:imageView];
         imageView.frame = mainFrame;
         NSString *urlStr = adView.data.imageUrl;
@@ -178,51 +228,102 @@
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
                 UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:urlStr]]];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    imageView.image = image;
+                    if (image) {
+                        imageView.image = image;
+                    }
                 });
             });
         }
     }
 
-    // 广告标识
-    UILabel *adLabel = [[UILabel alloc] init];
-    adLabel.backgroundColor = [UIColor adsy_colorWithHexString:@"#CCCCCC"];
-    adLabel.textColor = [UIColor adsy_colorWithHexString:@"#FFFFFF"];
-    adLabel.font = [UIFont adsy_PingFangLightFont:12];
-    adLabel.text = @"广告";
-    [adView addSubview:adLabel];
-    adLabel.frame = CGRectMake(17, (adWidth - 17 * 2) / 16.0 * 9 + 9, 36, 18);
-    adLabel.textAlignment = NSTextAlignmentCenter;
+    // ========== 2. 平台标识图标 (右下角) ==========
+    if (![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) {
+        UIImageView *platformIcon = [UIImageView new];
+        [adView addSubview:platformIcon];
+        CGFloat iconWidth = 46;
+        CGFloat iconHeight = 18;
+        platformIcon.frame = CGRectMake(adWidth - 10 - iconWidth, mediaHeight - iconHeight, iconWidth, iconHeight);
+        [adView adsy_platformLogoImageDarkMode:NO loadImageBlock:^(UIImage * _Nullable image) {
+            if (image) {
+                platformIcon.image = image;
+            }
+        }];
+    }
 
-    // 描述
-    UILabel *descLabel = [UILabel new];
-    descLabel.textColor = [UIColor adsy_colorWithHexString:@"#333333"];
-    descLabel.font = [UIFont adsy_PingFangLightFont:12];
+    // ========== 3. 描述文本 ==========
+    UILabel *descLabel = [[UILabel alloc] init];
+    descLabel.textColor = [UIColor adsy_colorWithHexString:@"#555555"];
+    descLabel.font = [UIFont systemFontOfSize:12];
     descLabel.textAlignment = NSTextAlignmentLeft;
     descLabel.text = adView.data.desc;
+    descLabel.numberOfLines = 2;
+    descLabel.lineBreakMode = NSLineBreakByTruncatingTail;
     [adView addSubview:descLabel];
-    descLabel.frame = CGRectMake(17 + 36 + 4, (adWidth - 17 * 2) / 16.0 * 9 + 9, adWidth - 57 - 17 - 20, 18);
+
+    CGFloat descTop = mediaHeight + 10;
+    descLabel.frame = CGRectMake(10, descTop, adWidth - 10 * 2, descHeight);
+
+    // ========== 4. 标题行 (标题 + 关闭按钮) ==========
+    CGFloat titleTop = descTop + descHeight + 10;
 
     // 标题
-    UILabel *titleLabel = [UILabel new];
-    [adView addSubview:titleLabel];
-    titleLabel.font = [UIFont adsy_PingFangMediumFont:14];
-    titleLabel.textColor = [UIColor adsy_colorWithHexString:@"#333333"];
-    titleLabel.numberOfLines = 2;
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.font = [UIFont systemFontOfSize:12];
+    titleLabel.textColor = [UIColor adsy_colorWithHexString:@"#555555"];
+    titleLabel.numberOfLines = 1;
+    titleLabel.lineBreakMode = NSLineBreakByTruncatingTail;
     titleLabel.text = adView.data.title;
-    CGSize textSize = [titleLabel sizeThatFits:CGSizeMake(adWidth - 17 * 2, 999)];
-    titleLabel.frame = CGRectMake(17, (adWidth - 17 * 2) / 16.0 * 9 + 30, adWidth - 17 * 2, textSize.height);
+    [adView addSubview:titleLabel];
 
-    // 关闭按钮
-    UIButton *closeButton = [UIButton new];
+    CGFloat titleLeft = 10;
+    CGFloat titleRight = adWidth - 10 - closeSize - 10;  // 右边距 - 关闭按钮 - 间距
+    titleLabel.frame = CGRectMake(titleLeft, titleTop, titleRight - titleLeft, closeSize);
+
+    // 关闭按钮 (X 图标) - 使用自定义视图防止触发广告点击
+    RNCloseButtonView *closeButton = [[RNCloseButtonView alloc] initWithFrame:CGRectMake(adWidth - 10 - closeSize, titleTop, closeSize, closeSize)];
+    closeButton.targetAdView = adView;
+
+    // 保存关闭按钮引用，以便后续移除
+    self.closeButtonView = closeButton;
+
+    // 设置关闭回调
+    __weak typeof(self) weakSelf = self;
+    closeButton.onCloseAction = ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && strongSelf.currentAdView) {
+            [strongSelf.currentAdView adsy_close];
+            [strongSelf.emitter nativeFeedAdClose:@{
+                @"posId": strongSelf.posId ?: @""
+            }];
+        }
+    };
+
+    // 绘制 X 图标
+    UIGraphicsBeginImageContextWithOptions(closeButton.frame.size, NO, [UIScreen mainScreen].scale);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGFloat padding = 4;
+    CGContextSetStrokeColorWithColor(context, [UIColor adsy_colorWithHexString:@"#333333"].CGColor);
+    CGContextSetLineWidth(context, 2);
+
+    // 第一条线 (左上到右下)
+    CGContextMoveToPoint(context, padding, padding);
+    CGContextAddLineToPoint(context, closeSize - padding, closeSize - padding);
+
+    // 第二条线 (右上到左下)
+    CGContextMoveToPoint(context, closeSize - padding, padding);
+    CGContextAddLineToPoint(context, padding, closeSize - padding);
+
+    CGContextStrokePath(context);
+    UIImage *closeIcon = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    UIImageView *closeImageView = [[UIImageView alloc] initWithFrame:closeButton.bounds];
+    closeImageView.image = closeIcon;
+    closeImageView.contentMode = UIViewContentModeCenter;
+    [closeButton addSubview:closeImageView];
+
+    // 将关闭按钮添加到 adView
     [adView addSubview:closeButton];
-    [adView bringSubviewToFront:closeButton];
-    closeButton.frame = CGRectMake(adWidth - 54, 0, 54, 18);
-    closeButton.titleLabel.font = [UIFont systemFontOfSize:12];
-    [closeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [closeButton setBackgroundColor:[UIColor colorWithRed:69/255 green:69/255 blue:69/255 alpha:0.7]];
-    [closeButton setTitle:@"关闭" forState:UIControlStateNormal];
-    [closeButton addTarget:adView action:@selector(adsy_close) forControlEvents:UIControlEventTouchDown];
 }
 
 @end
@@ -242,6 +343,16 @@ RCT_EXPORT_VIEW_PROPERTY(posId, NSString)
 RCT_CUSTOM_VIEW_PROPERTY(adWidth, NSNumber, RNNativeFeedADView) {
     CGFloat width = [json floatValue];
     view.adWidthDp = width;
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(adHeight, NSNumber, RNNativeFeedADView) {
+    CGFloat height = [json floatValue];
+    view.adHeightDp = height;
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(maxMediaHeight, NSNumber, RNNativeFeedADView) {
+    CGFloat height = [json floatValue];
+    view.maxMediaHeightDp = height;
 }
 
 @end
