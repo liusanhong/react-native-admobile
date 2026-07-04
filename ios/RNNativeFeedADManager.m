@@ -66,6 +66,15 @@
 @property (nonatomic, weak) RNNativeFeedADView *weakSelf;
 @property (nonatomic, strong) UIView<ADSuyiAdapterNativeAdViewDelegate> *currentAdView;
 @property (nonatomic, strong) RNCloseButtonView *closeButtonView;
+// 子视图引用，用于在图片加载后更新布局
+@property (nonatomic, weak) UIImageView *mainImageView;
+@property (nonatomic, weak) UIImageView *platformIconView;
+@property (nonatomic, weak) UILabel *descLabelView;
+@property (nonatomic, weak) UILabel *titleLabelView;
+@property (nonatomic, weak) UIImageView *mainImageViewRef;
+// 防止重复发送高度事件
+@property (nonatomic, assign) BOOL hasSentHeightEvent;
+@property (nonatomic, assign) BOOL hasPendingImageLoad;
 @end
 
 @implementation RNNativeFeedADView
@@ -163,12 +172,16 @@
         [self addSubview:adView];
         self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, w, h);
 
-        // 发送渲染成功事件
-        [self.emitter nativeFeedAdRenderSuccess:@{
-            @"posId": self.posId ?: @"",
-            @"width": @(w),
-            @"height": @(h)
-        }];
+        // 如果有待加载的图片，延迟发送高度事件（等图片加载完成后再发）
+        // 避免多次发送导致列表跳动
+        if (!self.hasPendingImageLoad && !self.hasSentHeightEvent) {
+            self.hasSentHeightEvent = YES;
+            [self.emitter nativeFeedAdRenderSuccess:@{
+                @"posId": self.posId ?: @"",
+                @"width": @(w),
+                @"height": @(h)
+            }];
+        }
     });
 }
 
@@ -220,9 +233,13 @@
     // 保存当前 adView 引用，用于后续排除关闭按钮
     self.currentAdView = adView;
 
+    // 重置标志
+    self.hasSentHeightEvent = NO;
+    self.hasPendingImageLoad = NO;
+
     CGFloat adWidth = self.adWidthDp > 0 ? self.adWidthDp : [UIScreen mainScreen].bounds.size.width;
 
-    // 使用 3:4 比例，匹配 Android 实现
+    // 使用默认高度初始化，后续根据图片实际尺寸调整（匹配 Android 实现）
     CGFloat mediaWidth = adWidth - 10 * 2;  // 左右各 10dp margin
     CGFloat mediaHeight = [self getFallbackMediaHeight];  // 应用 maxHeight 限制
     CGFloat descHeight = 36;  // 描述行高度 (2行)
@@ -235,26 +252,72 @@
     // ========== 1. 媒体区域 (图片/视频) ==========
     CGRect mainFrame = CGRectMake(10, 0, mediaWidth, mediaHeight);
     UIView *mediaViewForClick = nil;  // 保存媒体视图用于注册点击
+
     if (adView.data.shouldShowMediaView) {
         UIView *mediaView = [adView adsy_mediaViewForWidth:mainFrame.size.width];
         mediaView.frame = mainFrame;
         mediaView.userInteractionEnabled = NO;
-        mediaViewForClick = mediaView;  // 保存引用
+        mediaViewForClick = mediaView;
         [adView addSubview:mediaView];
     } else {
         UIImageView *imageView = [UIImageView new];
         imageView.backgroundColor = [UIColor adsy_colorWithHexString:@"#F5F5F5"];
+        imageView.contentMode = UIViewContentModeScaleAspectFit;  // 匹配 Android 的 FIT_CENTER：保持宽高比，完整显示图片
         imageView.userInteractionEnabled = NO;  // 禁止用户交互
         [adView addSubview:imageView];
         imageView.frame = mainFrame;
-        mediaViewForClick = imageView;  // 保存引用，用于注册点击
+        self.mainImageViewRef = imageView;  // 保存引用用于后续更新
+        mediaViewForClick = imageView;
+
         NSString *urlStr = adView.data.imageUrl;
         if (urlStr.length > 0) {
+            // 标记有待加载的图片，延迟发送高度事件
+            self.hasPendingImageLoad = YES;
+
+            // 先获取图片尺寸，再根据宽高比调整布局（匹配 Android 的 calculateMediaHeight 逻辑）
+            __weak typeof(self) weakSelf = self;
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:urlStr]]];
+                NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlStr]];
+                UIImage *image = [UIImage imageWithData:imageData];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if (image) {
-                        imageView.image = image;
+                    __strong typeof(weakSelf) strongSelf = weakSelf;
+                    if (strongSelf && image && strongSelf.mainImageViewRef) {
+                        CGFloat imageWidth = image.size.width;
+                        CGFloat imageHeight = image.size.height;
+
+                        // 根据图片实际宽高比重新计算媒体高度（匹配 Android）
+                        CGFloat calculatedMediaHeight = mediaHeight;
+                        if (imageWidth > 0 && imageHeight > 0 && mediaWidth > 0) {
+                            calculatedMediaHeight = MAX(1, round(mediaWidth * imageHeight / imageWidth));
+                            // 应用 maxHeight 限制
+                            calculatedMediaHeight = [strongSelf limitMediaHeight:calculatedMediaHeight];
+                        }
+
+                        // 更新图片视图 frame 和 image（匹配 Android FIT_CENTER 行为）
+                        // 当高度被 maxHeight 限制时，需要调整宽度来保持宽高比
+                        CGFloat actualMediaWidth = mediaWidth;
+                        CGFloat actualMediaHeight = calculatedMediaHeight;
+
+                        // 如果高度被 maxHeight 限制了，需要反推正确的宽度以保持图片宽高比
+                        CGFloat originalCalculatedHeight = mediaWidth * imageHeight / imageWidth;
+                        if (originalCalculatedHeight > calculatedMediaHeight && calculatedMediaHeight == strongSelf.maxMediaHeightDp) {
+                            // 高度被限制了，反推宽度
+                            actualMediaWidth = calculatedMediaHeight * imageWidth / imageHeight;
+                        }
+
+                        // 设置居中的 frame
+                        CGFloat xOffset = (mediaWidth - actualMediaWidth) / 2 + 10;
+                        strongSelf.mainImageViewRef.frame = CGRectMake(xOffset, 0, actualMediaWidth, actualMediaHeight);
+                        strongSelf.mainImageViewRef.image = image;
+                        strongSelf.mainImageViewRef.contentMode = UIViewContentModeScaleAspectFit;
+
+                        // 直接更新布局，不使用动画
+                        [strongSelf updateAdViewLayout:adView
+                                       withMediaHeight:calculatedMediaHeight
+                                            mediaWidth:mediaWidth
+                                               adWidth:adWidth
+                                            descHeight:descHeight
+                                            closeSize:closeSize];
                     }
                 });
             });
@@ -264,6 +327,7 @@
     // ========== 2. 平台标识图标 (右下角) ==========
     if (![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) {
         UIImageView *platformIcon = [UIImageView new];
+        self.platformIconView = platformIcon;
         [adView addSubview:platformIcon];
         CGFloat iconWidth = 46;
         CGFloat iconHeight = 18;
@@ -283,6 +347,7 @@
     descLabel.text = adView.data.desc;
     descLabel.numberOfLines = 2;
     descLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    self.descLabelView = descLabel;
     [adView addSubview:descLabel];
 
     CGFloat descTop = mediaHeight + 10;
@@ -298,6 +363,7 @@
     titleLabel.numberOfLines = 1;
     titleLabel.lineBreakMode = NSLineBreakByTruncatingTail;
     titleLabel.text = adView.data.title;
+    self.titleLabelView = titleLabel;
     [adView addSubview:titleLabel];
 
     CGFloat titleLeft = 10;
@@ -358,6 +424,63 @@
     } else {
         // 如果没有媒体视图，注册整个 adView
         [adView adsy_registViews:@[adView]];
+    }
+}
+
+/**
+ * 在获取图片实际尺寸后，更新广告视图布局
+ * 匹配 Android 的 calculateMediaHeight 逻辑
+ * 移除动画以避免瀑布流闪烁
+ */
+- (void)updateAdViewLayout:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView
+           withMediaHeight:(CGFloat)mediaHeight
+                mediaWidth:(CGFloat)mediaWidth
+                   adWidth:(CGFloat)adWidth
+                descHeight:(CGFloat)descHeight
+                closeSize:(CGFloat)closeSize {
+    // 更新整个 adView 的高度
+    CGFloat titleRowHeight = closeSize;
+    CGFloat newAdHeight = mediaHeight + 10 + descHeight + 10 + titleRowHeight;
+    CGRect newAdViewFrame = adView.frame;
+    newAdViewFrame.size.height = newAdHeight;
+    adView.frame = newAdViewFrame;
+
+    // 更新平台图标位置
+    if (self.platformIconView) {
+        CGFloat iconWidth = 46;
+        CGFloat iconHeight = 18;
+        self.platformIconView.frame = CGRectMake(adWidth - 10 - iconWidth, mediaHeight - iconHeight, iconWidth, iconHeight);
+    }
+
+    // 更新描述文本位置
+    if (self.descLabelView) {
+        CGFloat descTop = mediaHeight + 10;
+        self.descLabelView.frame = CGRectMake(10, descTop, adWidth - 10 * 2, descHeight);
+    }
+
+    // 更新标题和关闭按钮位置
+    CGFloat titleTop = (mediaHeight + 10 + descHeight + 10);
+    if (self.titleLabelView) {
+        CGFloat titleLeft = 10;
+        CGFloat titleRight = adWidth - 10 - closeSize - 10;
+        self.titleLabelView.frame = CGRectMake(titleLeft, titleTop, titleRight - titleLeft, closeSize);
+    }
+
+    if (self.closeButtonView) {
+        CGRect closeFrame = self.closeButtonView.frame;
+        closeFrame.origin.y = 10;
+        self.closeButtonView.frame = closeFrame;
+    }
+
+    // 重置待加载标志并通知 JS 层高度变化（只发送一次）
+    self.hasPendingImageLoad = NO;
+    if (!self.hasSentHeightEvent) {
+        self.hasSentHeightEvent = YES;
+        [self.emitter nativeFeedAdRenderSuccess:@{
+            @"posId": self.posId ?: @"",
+            @"width": @(adWidth),
+            @"height": @(newAdHeight)
+        }];
     }
 }
 
