@@ -4,7 +4,6 @@
 //
 
 #import "RNNativeFeedADManager.h"
-#import "RNNativeFeedADEmitter.h"
 #import <ADSuyiSDK/ADSuyiSDKNativeAd.h>
 #import <ADSuyiKit/UIFont+ADSuyiKit.h>
 #import <ADSuyiKit/UIColor+ADSuyiKit.h>
@@ -62,7 +61,6 @@
 @property (nonatomic, assign) CGFloat adHeightDp;
 @property (nonatomic, assign) CGFloat maxMediaHeightDp;
 @property (nonatomic, strong) ADSuyiSDKNativeAd *nativeAd;
-@property (nonatomic, strong) RNNativeFeedADEmitter *emitter;
 @property (nonatomic, weak) RNNativeFeedADView *weakSelf;
 @property (nonatomic, strong) UIView<ADSuyiAdapterNativeAdViewDelegate> *currentAdView;
 @property (nonatomic, strong) RNCloseButtonView *closeButtonView;
@@ -72,6 +70,13 @@
 @property (nonatomic, weak) UILabel *descLabelView;
 @property (nonatomic, weak) UILabel *titleLabelView;
 @property (nonatomic, weak) UIImageView *mainImageViewRef;
+// 防止重复发送高度事件
+@property (nonatomic, assign) BOOL hasSentHeightEvent;
+@property (nonatomic, assign) BOOL hasPendingImageLoad;
+// 直接事件回调（对齐 Android RNNativeFeedAdView 的 sendEvent 模式）
+@property (nonatomic, copy) RCTDirectEventBlock onNativeRenderSuccess;
+@property (nonatomic, copy) RCTDirectEventBlock onNativeFail;
+@property (nonatomic, copy) RCTDirectEventBlock onNativeClose;
 @end
 
 @implementation RNNativeFeedADView
@@ -97,8 +102,6 @@
 
 - (void)loadAd {
     if (self.posId.length == 0) return;
-
-    self.emitter = [RNNativeFeedADEmitter allocWithZone:nil];
 
     CGFloat adWidth = self.adWidthDp > 0 ? self.adWidthDp : [UIScreen mainScreen].bounds.size.width;
     self.nativeAd = [[ADSuyiSDKNativeAd alloc] initWithAdSize:CGSizeMake(adWidth, 0)];
@@ -129,8 +132,8 @@
                       adViewArray:(NSArray<__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *> *)adViewArray {
     for (UIView<ADSuyiAdapterNativeAdViewDelegate> *adView in adViewArray) {
         if (adView.renderType == ADSuyiAdapterRenderTypeNative) {
-            // 自渲染：拼装原生 UI（内部会在关闭按钮创建后注册交互）
-            [self setUpTopImageNativeAdView:adView];
+            // 自渲染：参考安卓做法，先获取图片尺寸再渲染（避免高度变化导致抖动）
+            [self setUpTopImageNativeAdViewWithImagePreload:adView];
         } else {
             // 模板渲染直接注册
             [adView adsy_registViews:@[adView]];
@@ -148,14 +151,22 @@
 
 - (void)adsy_nativeAdFailToLoad:(ADSuyiSDKNativeAd *)nativeAd
                      errorModel:(ADSuyiAdapterErrorDefine *)errorModel {
-    [self.emitter nativeFeedAdFail:@{
-        @"posId": self.posId ?: @"",
-        @"errorCode": @(errorModel.code),
-        @"errorDescription": errorModel.errorDescription ?: @""
-    }];
+    if (self.onNativeFail) {
+        self.onNativeFail(@{
+            @"posId": self.posId ?: @"",
+            @"errorCode": @(errorModel.code),
+            @"errorDescription": errorModel.errorDescription ?: @""
+        });
+    }
 }
 
 - (void)adsy_nativeAdViewRenderOrRegistSuccess:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
+    // 自渲染广告在 setUpTopImageNativeAdViewWithImagePreload 中已经处理完毕
+    // 这里只处理模板广告，避免重复逻辑
+    if (adView.renderType == ADSuyiAdapterRenderTypeNative) {
+        return;
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         // 清空旧的子视图
         for (UIView *sub in self.subviews) {
@@ -169,20 +180,28 @@
         [self addSubview:adView];
         self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, w, h);
 
-        // 发送渲染成功事件
-        [self.emitter nativeFeedAdRenderSuccess:@{
-            @"posId": self.posId ?: @"",
-            @"width": @(w),
-            @"height": @(h)
-        }];
+        // 只发送一次高度事件
+        if (!self.hasSentHeightEvent) {
+            self.hasSentHeightEvent = YES;
+            if (self.onNativeRenderSuccess) {
+                self.onNativeRenderSuccess(@{
+                    @"posId": self.posId ?: @"",
+                    @"width": @(w),
+                    @"height": @(h)
+                });
+            }
+        }
     });
 }
 
 - (void)adsy_nativeAdViewRenderOrRegistFail:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
-    [self.emitter nativeFeedAdFail:@{
-        @"errorCode": @(-1),
-        @"errorDescription": @"渲染失败"
-    }];
+    if (self.onNativeFail) {
+        self.onNativeFail(@{
+            @"posId": self.posId ?: @"",
+            @"errorCode": @(-1),
+            @"errorDescription": @"渲染失败"
+        });
+    }
 }
 
 - (void)adsy_nativeAdClicked:(ADSuyiSDKNativeAd *)nativeAd
@@ -192,9 +211,11 @@
 - (void)adsy_nativeAdClose:(ADSuyiSDKNativeAd *)nativeAd
                     adView:(__kindof UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.emitter nativeFeedAdClose:@{
-            @"posId": self.posId ?: @""
-        }];
+        if (self.onNativeClose) {
+            self.onNativeClose(@{
+                @"posId": self.posId ?: @""
+            });
+        }
     });
 }
 
@@ -212,35 +233,140 @@
     return mediaHeight;
 }
 
-// 获取默认媒体高度
+// 获取默认媒体高度（不使用 adHeightDp，让每个广告根据实际图片高度显示不同高度）
 - (CGFloat)getFallbackMediaHeight {
     CGFloat adWidth = self.adWidthDp > 0 ? self.adWidthDp : [UIScreen mainScreen].bounds.size.width;
-    CGFloat defaultHeight = adWidth * 4.0 / 3.0;
-    if (self.adHeightDp > 0) {
-        defaultHeight = self.adHeightDp;
-    }
+    CGFloat defaultHeight = adWidth * 4.0 / 3.0;  // 默认 4:3 宽高比
     return [self limitMediaHeight:defaultHeight];
 }
 
-- (void)setUpTopImageNativeAdView:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
-    // 保存当前 adView 引用，用于后续排除关闭按钮
+/**
+ * 参考安卓做法：先预加载图片获取尺寸，再渲染布局
+ * 这样可以在渲染前就知道准确的高度，避免后续高度变化导致抖动
+ */
+- (void)setUpTopImageNativeAdViewWithImagePreload:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView {
+    // 保存当前 adView 引用
     self.currentAdView = adView;
 
+    // 重置标志
+    self.hasSentHeightEvent = NO;
+    self.hasPendingImageLoad = NO;
+
     CGFloat adWidth = self.adWidthDp > 0 ? self.adWidthDp : [UIScreen mainScreen].bounds.size.width;
+    CGFloat mediaWidth = adWidth - 10 * 2;
+    CGFloat descHeight = 36;
+    CGFloat closeSize = 20;
+    CGFloat titleRowHeight = closeSize;
 
-    // 使用默认高度初始化，后续根据图片实际尺寸调整（匹配 Android 实现）
-    CGFloat mediaWidth = adWidth - 10 * 2;  // 左右各 10dp margin
-    CGFloat mediaHeight = [self getFallbackMediaHeight];  // 应用 maxHeight 限制
-    CGFloat descHeight = 36;  // 描述行高度 (2行)
-    CGFloat closeSize = 20;  // 关闭按钮尺寸
-    CGFloat titleRowHeight = closeSize;  // 标题行高度
-    CGFloat adHeight = mediaHeight + 10 + descHeight + 10 + titleRowHeight;  // 总高度
+    // 检查是否有图片需要预加载
+    NSString *imageUrl = adView.data.imageUrl;
+    BOOL hasMediaView = adView.data.shouldShowMediaView;
 
+    if (hasMediaView) {
+        // 视频广告：使用默认高度直接渲染
+        CGFloat mediaHeight = [self getFallbackMediaHeight];
+        CGFloat adHeight = mediaHeight + 10 + descHeight + 10 + titleRowHeight;
+        [self renderAdView:adView
+                withImage:nil
+                imageWidth:0
+                imageHeight:0
+                mediaWidth:mediaWidth
+                mediaHeight:mediaHeight
+                adWidth:adWidth
+                descHeight:descHeight
+                closeSize:closeSize
+                adHeight:adHeight];
+        return;
+    }
+
+    if (imageUrl.length > 0) {
+        // 标记有待加载的图片
+        self.hasPendingImageLoad = YES;
+
+        // 先在后台获取图片尺寸（参考安卓的 loadImageBitmap）
+        __weak typeof(self) weakSelf = self;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrl]];
+            UIImage *image = [UIImage imageWithData:imageData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                if (!strongSelf) {
+                    return;  // 广告视图已被释放
+                }
+
+                CGFloat imageWidth = image ? image.size.width : 0;
+                CGFloat imageHeight = image ? image.size.height : 0;
+
+                // 根据图片尺寸计算媒体高度
+                CGFloat calculatedMediaHeight = [strongSelf getFallbackMediaHeight];
+                if (imageWidth > 0 && imageHeight > 0 && mediaWidth > 0) {
+                    calculatedMediaHeight = MAX(1, round(mediaWidth * imageHeight / imageWidth));
+                    calculatedMediaHeight = [strongSelf limitMediaHeight:calculatedMediaHeight];
+                    NSLog(@"[iOS Ad] Image loaded: %.0fx%.0f, calculated media height: %.0f (max limit: %.0f)", imageWidth, imageHeight, calculatedMediaHeight, strongSelf.maxMediaHeightDp);
+                } else {
+                    NSLog(@"[iOS Ad] Using fallback media height: %.0f (image size: %.0fx%.0f)", calculatedMediaHeight, imageWidth, imageHeight);
+                }
+
+                CGFloat adHeight = calculatedMediaHeight + 10 + descHeight + 10 + titleRowHeight;
+                NSLog(@"[iOS Ad] Final ad height: %.0f (posId: %@)", adHeight, strongSelf.posId);
+
+                // 用已知的高度渲染布局
+                [strongSelf renderAdView:adView
+                                withImage:image
+                              imageWidth:imageWidth
+                             imageHeight:imageHeight
+                               mediaWidth:mediaWidth
+                              mediaHeight:calculatedMediaHeight
+                                  adWidth:adWidth
+                               descHeight:descHeight
+                                closeSize:closeSize
+                                  adHeight:adHeight];
+            });
+        });
+    } else {
+        // 无图片：使用默认高度
+        CGFloat mediaHeight = [self getFallbackMediaHeight];
+        CGFloat adHeight = mediaHeight + 10 + descHeight + 10 + titleRowHeight;
+        [self renderAdView:adView
+                withImage:nil
+                imageWidth:0
+                imageHeight:0
+                mediaWidth:mediaWidth
+                mediaHeight:mediaHeight
+                adWidth:adWidth
+                descHeight:descHeight
+                closeSize:closeSize
+                adHeight:adHeight];
+    }
+}
+
+/**
+ * 渲染广告视图（此时已知所有尺寸，高度不会再变化）
+ */
+- (void)renderAdView:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView
+            withImage:(UIImage *)image
+          imageWidth:(CGFloat)imageWidth
+         imageHeight:(CGFloat)imageHeight
+           mediaWidth:(CGFloat)mediaWidth
+          mediaHeight:(CGFloat)mediaHeight
+              adWidth:(CGFloat)adWidth
+           descHeight:(CGFloat)descHeight
+           closeSize:(CGFloat)closeSize
+             adHeight:(CGFloat)adHeight {
+
+    // 先清空旧的子视图
+    for (UIView *sub in self.subviews) {
+        [sub removeFromSuperview];
+    }
+
+    // 设置广告视图的 frame 并添加到自身（这里完成，adsy_nativeAdViewRenderOrRegistSuccess 不需要再做）
     adView.frame = CGRectMake(0, 0, adWidth, adHeight);
+    [self addSubview:adView];
+    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, adWidth, adHeight);
 
-    // ========== 1. 媒体区域 (图片/视频) ==========
+    // ========== 1. 媒体区域 ==========
     CGRect mainFrame = CGRectMake(10, 0, mediaWidth, mediaHeight);
-    UIView *mediaViewForClick = nil;  // 保存媒体视图用于注册点击
+    UIView *mediaViewForClick = nil;
 
     if (adView.data.shouldShowMediaView) {
         UIView *mediaView = [adView adsy_mediaViewForWidth:mainFrame.size.width];
@@ -251,75 +377,30 @@
     } else {
         UIImageView *imageView = [UIImageView new];
         imageView.backgroundColor = [UIColor adsy_colorWithHexString:@"#F5F5F5"];
-        imageView.contentMode = UIViewContentModeScaleAspectFit;  // 匹配 Android 的 FIT_CENTER：保持宽高比，完整显示图片
-        imageView.userInteractionEnabled = NO;  // 禁止用户交互
+        imageView.contentMode = UIViewContentModeScaleAspectFit;
+        imageView.userInteractionEnabled = NO;
         [adView addSubview:imageView];
         imageView.frame = mainFrame;
-        self.mainImageViewRef = imageView;  // 保存引用用于后续更新
+        self.mainImageViewRef = imageView;
         mediaViewForClick = imageView;
 
-        NSString *urlStr = adView.data.imageUrl;
-        if (urlStr.length > 0) {
-            // 先获取图片尺寸，再根据宽高比调整布局（匹配 Android 的 calculateMediaHeight 逻辑）
-            __weak typeof(self) weakSelf = self;
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-                NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:urlStr]];
-                UIImage *image = [UIImage imageWithData:imageData];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    __strong typeof(weakSelf) strongSelf = weakSelf;
-                    if (strongSelf && image && strongSelf.mainImageViewRef) {
-                        CGFloat imageWidth = image.size.width;
-                        CGFloat imageHeight = image.size.height;
+        if (image) {
+            // 计算居中位置（当高度被限制时）
+            CGFloat actualMediaWidth = mediaWidth;
+            CGFloat actualMediaHeight = mediaHeight;
 
-                        // 根据图片实际宽高比重新计算媒体高度（匹配 Android）
-                        CGFloat calculatedMediaHeight = mediaHeight;
-                        if (imageWidth > 0 && imageHeight > 0 && mediaWidth > 0) {
-                            calculatedMediaHeight = MAX(1, round(mediaWidth * imageHeight / imageWidth));
-                            // 应用 maxHeight 限制
-                            calculatedMediaHeight = [strongSelf limitMediaHeight:calculatedMediaHeight];
-                        }
+            CGFloat originalCalculatedHeight = (imageWidth > 0 && imageHeight > 0) ? (mediaWidth * imageHeight / imageWidth) : mediaHeight;
+            if (originalCalculatedHeight > mediaHeight && mediaHeight == self.maxMediaHeightDp) {
+                actualMediaWidth = mediaHeight * imageWidth / imageHeight;
+            }
 
-                        // 更新图片视图 frame 和 image（匹配 Android FIT_CENTER 行为）
-                        // 当高度被 maxHeight 限制时，需要调整宽度来保持宽高比
-                        CGFloat actualMediaWidth = mediaWidth;
-                        CGFloat actualMediaHeight = calculatedMediaHeight;
-
-                        // 如果高度被 maxHeight 限制了，需要反推正确的宽度以保持图片宽高比
-                        CGFloat originalCalculatedHeight = mediaWidth * imageHeight / imageWidth;
-                        if (originalCalculatedHeight > calculatedMediaHeight && calculatedMediaHeight == strongSelf.maxMediaHeightDp) {
-                            // 高度被限制了，反推宽度
-                            actualMediaWidth = calculatedMediaHeight * imageWidth / imageHeight;
-                        }
-
-                        // 设置居中的 frame
-                        CGFloat xOffset = (mediaWidth - actualMediaWidth) / 2 + 10;
-                        CGRect finalImageFrame = CGRectMake(xOffset, 0, actualMediaWidth, actualMediaHeight);
-
-                        // 先淡入图片，再更新布局
-                        strongSelf.mainImageViewRef.alpha = 0;
-                        strongSelf.mainImageViewRef.frame = finalImageFrame;
-                        strongSelf.mainImageViewRef.image = image;
-                        strongSelf.mainImageViewRef.contentMode = UIViewContentModeScaleAspectFit;
-
-                        [UIView animateWithDuration:0.2
-                                         animations:^{
-                                             strongSelf.mainImageViewRef.alpha = 1.0;
-                                         } completion:^(BOOL finished) {
-                                             // 图片淡入完成后，重新布局所有子视图（带动画）
-                                             [strongSelf updateAdViewLayout:adView
-                                                            withMediaHeight:calculatedMediaHeight
-                                                                 mediaWidth:mediaWidth
-                                                                    adWidth:adWidth
-                                                                 descHeight:descHeight
-                                                                 closeSize:closeSize];
-                                         }];
-                    }
-                });
-            });
+            CGFloat xOffset = (mediaWidth - actualMediaWidth) / 2 + 10;
+            imageView.frame = CGRectMake(xOffset, 0, actualMediaWidth, actualMediaHeight);
+            imageView.image = image;
         }
     }
 
-    // ========== 2. 平台标识图标 (右下角) ==========
+    // ========== 2. 平台标识图标 ==========
     if (![adView.adsy_platform isEqualToString:ADSuyiAdapterPlatformGDT]) {
         UIImageView *platformIcon = [UIImageView new];
         self.platformIconView = platformIcon;
@@ -327,9 +408,9 @@
         CGFloat iconWidth = 46;
         CGFloat iconHeight = 18;
         platformIcon.frame = CGRectMake(adWidth - 10 - iconWidth, mediaHeight - iconHeight, iconWidth, iconHeight);
-        [adView adsy_platformLogoImageDarkMode:NO loadImageBlock:^(UIImage * _Nullable image) {
-            if (image) {
-                platformIcon.image = image;
+        [adView adsy_platformLogoImageDarkMode:NO loadImageBlock:^(UIImage * _Nullable img) {
+            if (img) {
+                platformIcon.image = img;
             }
         }];
     }
@@ -348,10 +429,9 @@
     CGFloat descTop = mediaHeight + 10;
     descLabel.frame = CGRectMake(10, descTop, adWidth - 10 * 2, descHeight);
 
-    // ========== 4. 标题行 (标题 + 关闭按钮) ==========
+    // ========== 4. 标题行 ==========
     CGFloat titleTop = descTop + descHeight + 10;
 
-    // 标题
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.font = [UIFont systemFontOfSize:12];
     titleLabel.textColor = [UIColor adsy_colorWithHexString:@"#555555"];
@@ -362,26 +442,24 @@
     [adView addSubview:titleLabel];
 
     CGFloat titleLeft = 10;
-    CGFloat titleRight = adWidth - 10 - closeSize - 10;  // 右边距 - 关闭按钮 - 间距
+    CGFloat titleRight = adWidth - 10 - closeSize - 10;
     titleLabel.frame = CGRectMake(titleLeft, titleTop, titleRight - titleLeft, closeSize);
 
-    // 关闭按钮 (X 图标) - 放在右上角，使用自定义视图防止触发广告点击
-    CGFloat closeTop = 10;  // 距离顶部 10dp
-    RNCloseButtonView *closeButton = [[RNCloseButtonView alloc] initWithFrame:CGRectMake(adWidth - 10 - closeSize, closeTop, closeSize, closeSize)];
+    // ========== 5. 关闭按钮 ==========
+    RNCloseButtonView *closeButton = [[RNCloseButtonView alloc] initWithFrame:CGRectMake(adWidth - 10 - closeSize, 10, closeSize, closeSize)];
     closeButton.targetAdView = adView;
-
-    // 保存关闭按钮引用，以便后续移除
     self.closeButtonView = closeButton;
 
-    // 设置关闭回调
     __weak typeof(self) weakSelf = self;
     closeButton.onCloseAction = ^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (strongSelf && strongSelf.currentAdView) {
             [strongSelf.currentAdView adsy_close];
-            [strongSelf.emitter nativeFeedAdClose:@{
-                @"posId": strongSelf.posId ?: @""
-            }];
+            if (strongSelf.onNativeClose) {
+                strongSelf.onNativeClose(@{
+                    @"posId": strongSelf.posId ?: @""
+                });
+            }
         }
     };
 
@@ -392,11 +470,8 @@
     CGContextSetStrokeColorWithColor(context, [UIColor adsy_colorWithHexString:@"#333333"].CGColor);
     CGContextSetLineWidth(context, 2);
 
-    // 第一条线 (左上到右下)
     CGContextMoveToPoint(context, padding, padding);
     CGContextAddLineToPoint(context, closeSize - padding, closeSize - padding);
-
-    // 第二条线 (右上到左下)
     CGContextMoveToPoint(context, closeSize - padding, padding);
     CGContextAddLineToPoint(context, padding, closeSize - padding);
 
@@ -409,77 +484,27 @@
     closeImageView.contentMode = UIViewContentModeCenter;
     [closeButton addSubview:closeImageView];
 
-    // 将关闭按钮添加到 adView
     [adView addSubview:closeButton];
 
-    // 注册交互：只注册媒体视图（图片/视频区域），不包含关闭按钮
-    // 只有点击媒体区域才会触发广告点击
+    // 标记已发送高度事件，防止 adsy_registViews 触发的代理回调重复发送
+    self.hasPendingImageLoad = NO;
+    self.hasSentHeightEvent = YES;
+
+    // 注册交互（会触发 adsy_nativeAdViewRenderOrRegistSuccess，但由于已设置标志位，不会重复发送事件）
     if (mediaViewForClick) {
         [adView adsy_registViews:@[mediaViewForClick]];
     } else {
-        // 如果没有媒体视图，注册整个 adView
         [adView adsy_registViews:@[adView]];
     }
-}
 
-/**
- * 在获取图片实际尺寸后，更新广告视图布局
- * 匹配 Android 的 calculateMediaHeight 逻辑
- * 添加动画使高度变化更平滑
- */
-- (void)updateAdViewLayout:(UIView<ADSuyiAdapterNativeAdViewDelegate> *)adView
-           withMediaHeight:(CGFloat)mediaHeight
-                mediaWidth:(CGFloat)mediaWidth
-                   adWidth:(CGFloat)adWidth
-                descHeight:(CGFloat)descHeight
-                closeSize:(CGFloat)closeSize {
-    // 更新整个 adView 的高度
-    CGFloat titleRowHeight = closeSize;
-    CGFloat newAdHeight = mediaHeight + 10 + descHeight + 10 + titleRowHeight;
-    CGRect newAdViewFrame = adView.frame;
-    newAdViewFrame.size.height = newAdHeight;
-
-    // 使用动画平滑过渡高度变化（匹配 Android 的体验）
-    [UIView animateWithDuration:0.25
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseInOut
-                     animations:^{
-                         adView.frame = newAdViewFrame;
-
-                         // 更新平台图标位置
-                         if (self.platformIconView) {
-                             CGFloat iconWidth = 46;
-                             CGFloat iconHeight = 18;
-                             self.platformIconView.frame = CGRectMake(adWidth - 10 - iconWidth, mediaHeight - iconHeight, iconWidth, iconHeight);
-                         }
-
-                         // 更新描述文本位置
-                         if (self.descLabelView) {
-                             CGFloat descTop = mediaHeight + 10;
-                             self.descLabelView.frame = CGRectMake(10, descTop, adWidth - 10 * 2, descHeight);
-                         }
-
-                         // 更新标题和关闭按钮位置
-                         CGFloat titleTop = (mediaHeight + 10 + descHeight + 10);
-                         if (self.titleLabelView) {
-                             CGFloat titleLeft = 10;
-                             CGFloat titleRight = adWidth - 10 - closeSize - 10;
-                             self.titleLabelView.frame = CGRectMake(titleLeft, titleTop, titleRight - titleLeft, closeSize);
-                         }
-
-                         if (self.closeButtonView) {
-                             CGRect closeFrame = self.closeButtonView.frame;
-                             closeFrame.origin.y = 10;
-                             self.closeButtonView.frame = closeFrame;
-                         }
-                     } completion:^(BOOL finished) {
-                         // 动画完成后通知 JS 层高度变化
-                         [self.emitter nativeFeedAdRenderSuccess:@{
-                             @"posId": self.posId ?: @"",
-                             @"width": @(adWidth),
-                             @"height": @(newAdHeight)
-                         }];
-                     }];
+    // 立即发送高度事件（在 adsy_registViews 之前设置标志位，确保代理回调不会重复发送）
+    if (self.onNativeRenderSuccess) {
+        self.onNativeRenderSuccess(@{
+            @"posId": self.posId ?: @"",
+            @"width": @(adWidth),
+            @"height": @(adHeight)
+        });
+    }
 }
 
 @end
@@ -510,5 +535,9 @@ RCT_CUSTOM_VIEW_PROPERTY(maxMediaHeight, NSNumber, RNNativeFeedADView) {
     CGFloat height = [json floatValue];
     view.maxMediaHeightDp = height;
 }
+
+RCT_EXPORT_VIEW_PROPERTY(onNativeRenderSuccess, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onNativeFail, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onNativeClose, RCTDirectEventBlock)
 
 @end
