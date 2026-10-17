@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   # optional - use expanded license entry instead:
   # s.license    = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "Your Name" => "yourname@email.com" }
-  s.platforms    = { :ios => "9.0" }
+  s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/github_account/react-native-admobile.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,c,cc,cpp,m,mm,swift}"
@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
 
   s.dependency "React"
   # ...
-  s.dependency "ADSuyiSDK",'~> 4.0.9.03183'# 26.5.30
+  s.dependency "ADSuyiSDK",'~> 4.1.5.09031'# 26.10.17
   s.dependency "ADSuyiSDK/ADSuyiSDKPlatforms/tianmu"
   s.dependency 'ADSuyiSDK/ADSuyiSDKPlatforms/bu' # 穿山甲(头条)
   s.dependency 'ADSuyiSDK/ADSuyiSDKPlatforms/gdt' # 优量汇(广点通）
