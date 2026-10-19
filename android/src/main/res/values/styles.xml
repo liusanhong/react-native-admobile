@@ -9,7 +9,7 @@
     </style>
 
     <style name="adSplash" parent="SplashScreen_SplashTheme">
-        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="android:windowBackground">@drawable/admobile_launch_screen</item>
     </style>
 
     <style name="TransparentProgressDialog" parent="Theme.AppCompat.Dialog">

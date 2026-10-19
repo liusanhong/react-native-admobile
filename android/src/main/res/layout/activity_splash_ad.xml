@@ -24,6 +24,6 @@
         android:background="#fff"
         android:adjustViewBounds="true"
         android:scaleType="fitXY"
-        android:src="@drawable/launch_screen_bottom"
+        android:src="@drawable/admobile_launch_screen_bottom"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

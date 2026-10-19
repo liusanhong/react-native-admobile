@@ -248,7 +248,7 @@ public class SplashAdActivity extends AppCompatActivity {
             options.inTargetDensity = 0; // 不进行密度缩放
 
             // 从drawable资源加载图片信息
-            android.graphics.BitmapFactory.decodeResource(getResources(), R.drawable.launch_screen_bottom, options);
+            android.graphics.BitmapFactory.decodeResource(getResources(), R.drawable.admobile_launch_screen_bottom, options);
 
             if (options.outWidth > 0 && options.outHeight > 0) {
                 // 计算图片在屏幕上的实际显示高度
