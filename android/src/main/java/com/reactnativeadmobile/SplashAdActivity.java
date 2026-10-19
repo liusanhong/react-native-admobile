@@ -7,19 +7,18 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.graphics.Rect;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 import cn.admobiletop.adsuyi.ad.ADSuyiSplashAd;
 import cn.admobiletop.adsuyi.ad.data.ADSuyiAdInfo;
@@ -27,6 +26,8 @@ import cn.admobiletop.adsuyi.ad.entity.ADSuyiAdSize;
 import cn.admobiletop.adsuyi.ad.entity.ADSuyiExtraParams;
 import cn.admobiletop.adsuyi.ad.error.ADSuyiError;
 import cn.admobiletop.adsuyi.ad.listener.ADSuyiSplashAdListener;
+
+import com.reactnativeadmobile.utils.UIUtils;
 
 
 public class SplashAdActivity extends AppCompatActivity {
@@ -52,6 +53,23 @@ public class SplashAdActivity extends AppCompatActivity {
             return insets.replaceSystemWindowInsets(left, top, right, bottom);
         });
 
+        // 设置沉浸式状态栏
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+
+        Window window = getWindow();
+        int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        decorView.setSystemUiVisibility(uiOptions);
+        window.setStatusBarColor(Color.TRANSPARENT);
+
+        // 状态栏文字变黑（API23+）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            decorView.setSystemUiVisibility(uiOptions | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
+
         setPortalOrientation();
 
         mContext = this;
@@ -65,35 +83,8 @@ public class SplashAdActivity extends AppCompatActivity {
 
         // 屏幕宽度px
         float widthPixels = getResources().getDisplayMetrics().widthPixels;
-        // 屏幕高度px
-        float heightPixels = getResources().getDisplayMetrics().heightPixels;
-
-        // 设置沉浸式状态栏
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }
-        // 沉浸式显示
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-
-            try {
-                decorView.setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | // 启用沉浸模式，避免系统栏意外出现
-                                View.SYSTEM_UI_FLAG_FULLSCREEN |     // 隐藏状态栏
-                                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |// 隐藏导航栏
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |  // 保持布局稳定
-                                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | // 保证全屏显示
-                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION // 保证全屏时隐藏导航栏
-                );
-                List<Rect> exclusionRects = new ArrayList<>();
-                Rect rect = new Rect(0, 0, (int) widthPixels, (int) heightPixels);
-                exclusionRects.add(rect);
-                Method method = View.class.getMethod("setSystemGestureExclusionRects", List.class);
-                method.invoke(decorView, exclusionRects);
-            } catch (Exception e) {
-
-            }
-        }
+        // 屏幕高度px（使用真实屏幕高度，不包含虚拟导航栏）
+        float heightPixels = UIUtils.getRealHeight(this);
 
         // 原始屏幕密度
         final float originalDensity = getRealScreenDensity(this);
@@ -114,7 +105,7 @@ public class SplashAdActivity extends AppCompatActivity {
 
 
         // 计算广告高度：屏幕高度 - 底部图片高度 + 状态栏高度
-        int adHeight = (int) heightPixels - bottomImageHeightPx + statusBarHeight + 20;
+        int adHeight = (int) heightPixels - bottomImageHeightPx;
 
         Log.e(TAG, "原始图片高度: " + bottomImageHeightPx + "px");
 //        Log.e(TAG, "调整后图片高度: " + adjustedBottomImageHeightPx + "px");
@@ -132,7 +123,7 @@ public class SplashAdActivity extends AppCompatActivity {
         adSuyiSplashAd.setLocalExtraParams(extraParams);
 
         // 设置是否是沉浸式，如果为true，跳过按钮距离顶部的高度会加上状态栏高度
-        adSuyiSplashAd.setImmersive(false);
+        adSuyiSplashAd.setImmersive(true);
 
         // 设置开屏广告监听
         adSuyiSplashAd.setListener(new ADSuyiSplashAdListener() {
